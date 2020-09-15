@@ -1,0 +1,54 @@
+#!/Users/Gavin/Documents/Digifiz-Dash/venv/bin/python
+#
+#
+
+import os, sys
+import importlib
+import warnings
+import shutil
+
+sys.path.insert(0, os.getcwd())
+
+curdir = os.path.abspath(os.getcwd())
+try: fname = sys.argv[1]
+except: fname = curdir.split(os.sep)[-1]
+installdir = fname.upper()
+
+if not os.path.isdir(installdir): os.mkdir(installdir)
+print("setting PYTHONPATH to %s" % installdir)
+
+os.environ['PYTHONPATH'] = installdir
+
+#try: shutil.copyfile("sgmllib.py", installdir + os.sep + "sgmllib.py")
+#except Exception as ex: print(ex)
+try: shutil.rmtree("MEDS")
+except Exception as ex: pass
+try: shutil.rmtree("dist")
+except Exception as ex: pass
+try: shutil.rmtree("%s.egg-info" % fname)
+except Exception as ex: pass
+try: os.mkdir("dist")
+except Exception as ex: pass
+try: os.mkdir("MEDS")
+except Exception as ex: pass
+
+for line in os.popen("python3 setup.py sdist").readlines(): print(line.strip())
+
+fns = os.listdir("dist")
+target = fname
+highest = 0
+for fn in fns:
+    f = fn.split(".")[0]
+    nr = int(f.split("-")[-1])
+    if nr > highest: highest = nr ; target = fn
+
+try:
+    from setuptools.command.easy_install import main
+    import pkg_resources
+except ImportError as ex: print("setuptools is needed to use meds-do: %s" % str(ex)) ;  os._exit(1)
+
+runstring = '--record=install.log --install-dir=%s -a -U -l %s/dist/%s ' % (installdir, os.getcwd(), target)
+main(runstring.split())
+for line in os.popen("tar zcvf %s.tar.gz %s" % (fname, fname.upper())).readlines(): print(line.strip())
+for line in os.popen("cp docs/txt/MEDS MEDS/README").readlines(): print(line.strip())
+print(runstring)

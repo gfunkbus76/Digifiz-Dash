@@ -1,0 +1,52 @@
+#!/Users/Gavin/Documents/Digifiz-Dash/venv/bin/python
+# -*- coding: utf-8 -*-
+#
+
+""" replace """
+
+import os, sys, warnings
+sys.path.insert(0, os.getcwd())
+warnings.simplefilter("ignore", UserWarning)
+
+from meds.utils.join import j
+from meds.utils.cli import  opts_defs_sed, make_opts
+from meds.utils.file import highest
+from meds.utils.misc import run_sed
+from meds.object import Object
+from meds.log import loglevel
+
+import logging
+import shutil
+import sys
+import os
+
+def do_replace(ddir, sedstring, allowed=""):
+    logging.info("dir %s" % ddir)
+    target = ddir
+    for f in os.listdir(ddir):
+        if "__" in f and "init" not in f: continue
+        if ".hg" in f: continue
+        if f.endswith("~"): continue
+        target = ddir + os.sep + f
+        if allowed in f: run_sed(target, sedstring)
+        if os.path.isdir(target): do_replace(target, sedstring, allowed)
+
+def main():
+    opts, args = make_opts(opts_defs_sed)
+    cfg = Object()
+    cfg.update(vars(opts))
+    level = cfg.get("loglevel", None) or "error"
+    loglevel(level)
+    dir_sed = cfg.get("dir_sed", None) or os.getcwd()
+    if args: str_sed = args[0]
+    else: print("need a sedstring .. use s#text#replacingtext#") ; os._exit(1)
+    try: 
+        base, fn = os.path.split(dir_sed)
+        target = highest(base, fn)
+        shutil.copytree(dir_sed, base + os.sep + target)
+    except OSError: logging.error("can't copy %s to %s" % (base, target)) ; os._exit(1)
+    do_replace(base + os.sep + target, str_sed, ".py")
+    do_replace(base + os.sep + target + os.sep + "bin", str_sed, "")
+    os.popen("chmod +x %s" % base + os.sep + target + os.sep + "bin")
+
+if __name__ == "__main__": main()

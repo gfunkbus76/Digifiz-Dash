@@ -1,0 +1,22 @@
+#!/Users/Gavin/Documents/Digifiz-Dash/venv/bin/python
+#
+# do the documentation generation cycle
+#
+# Copyright (c) 2016 Bart Thate
+
+import sys, os, shutil 
+
+curdir = os.path.abspath(os.getcwd())
+try: projectname = sys.argv[1]
+except: projectname = curdir.split(os.sep)[-1]
+
+os.environ["SPHINX_APIDOC_OPTIONS"] = "noindex"
+
+import unittest
+
+for line in os.popen("rm -fR docs/html").readlines(): print(line.strip())
+for line in os.popen("rm -fR docs/code").readlines(): print(line.strip())
+for line in os.popen("rm -fR docs/api").readlines(): print(line.strip())
+for line in os.popen("mkdir docs/html").readlines(): print(line.strip())
+for line in os.popen("mkdir docs/code").readlines(): print(line.strip())
+for line in os.popen("mkdir docs/api").readlines(): print(line.strip())

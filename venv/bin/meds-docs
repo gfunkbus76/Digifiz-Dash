@@ -1,0 +1,49 @@
+#!/Users/Gavin/Documents/Digifiz-Dash/venv/bin/python
+#
+# do the documentation generation cycle
+
+import sys, os, shutil, importlib
+
+importlib.invalidate_caches()
+sys.path.insert(0, os.getcwd())
+sys.path.insert(0, os.getcwd() + os.sep + '..')
+
+source = os.path.abspath(os.getcwd())
+#source = os.sep.join(source.split(os.sep)[:-1])
+curdir = os.path.abspath(os.getcwd())
+docdir = os.path.join(source, "docs")
+sourcedir = os.path.join(source, "meds")
+targetdir = os.path.join(curdir, "docs")
+
+try: projectname = sys.argv[1]
+except: projectname = curdir.split(os.sep)[-1]
+
+if os.path.isdir(curdir + os.sep + projectname):
+    docdir = curdir + os.sep + "docs"
+    sourcedir = curdir + os.sep + projectname
+
+print("source is %s" % source)
+sys.path.insert(0, source)
+
+os.environ["SPHINX_APIDOC_OPTIONS"] = "noindex"
+os.environ["SPHINX_AUTOGEN_OPTIONS"] = "noindex"
+os.environ['PYTHONPATH'] = os.path.abspath(source)
+
+import unittest
+
+for line in os.popen("rm -fR docs/html/").readlines(): print(line.strip())
+for line in os.popen("rm -fR docs/code/").readlines(): print(line.strip())
+for line in os.popen("mkdir docs/html 2>&1").readlines(): pass
+for line in os.popen("mkdir docs/code 2>&1").readlines(): print(line.strip())
+#for line in os.popen("bin/meds-test").readlines(): print(line.strip())
+#for line in os.popen("bin/meds-doctest").readlines(): print(line.strip())
+for line in os.popen("sphinx-autogen docs/SOURCE.rst -o %s/code -t docs/_templates" % targetdir).readlines(): print(line.strip())
+for line in os.popen("sphinx-build %s %s/html" % (docdir, targetdir)).readlines(): pass #print(line.strip())
+
+zipname = "%s.html.zip" % projectname
+os.chdir("%s/html" % targetdir)
+
+for line in os.popen("zip -r %s.html.zip *" % projectname).readlines(): pass
+for line in os.popen("mv %s.html.zip ../../" % projectname).readlines(): pass
+
+os.chdir(os.getcwd())

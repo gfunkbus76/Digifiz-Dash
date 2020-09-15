@@ -1,0 +1,34 @@
+#!/Users/Gavin/Documents/Digifiz-Dash/venv/bin/python
+#
+#
+
+""" install in .local . """
+
+import os, sys
+import importlib
+import warnings
+
+warnings.simplefilter("ignore", UserWarning)
+
+importlib.invalidate_caches()
+
+try:
+    from setuptools.command.easy_install import main
+    import pkg_resources
+except ImportError as ex: print("setuptools is needed to use meds-local: %s" % str(ex)) ;  os._exit(1)
+
+## RUN
+
+for line in os.popen("python3 setup.py sdist").readlines():
+    print(line.strip())
+
+fns = os.listdir("dist")
+name = ""
+highest = 0
+for fn in fns:
+    f = fn.split(".")[0]
+    nr = int(f.split("-")[-1])
+    if nr > highest: highest = nr ; name = fn
+
+runstring = '--user -U -l dist/%s' % name
+main(runstring.split())
