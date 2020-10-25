@@ -28,12 +28,14 @@ wiperstate = 0
 wiperplusstate = 0
 wiperminusstate = 0
 hornstate = 0
-fuelstate = 12
+rpmstate = 12
 engine_tempstate = 8
 odo_state = 1  # 1 = display odometer, 0 = display tripometer
 
 ''' Arduino Variables '''
 displayed_speed = "11"
+rpm_level_arduino = "0" #note: this value from pi is a raw dump of the adc from 0 to 1024 (630=emplty, 210=full)
+
 
 # Initialize the pygame
 pygame.init()
@@ -61,6 +63,9 @@ pygame.display.set_caption("Digifiz Dashboard v" + digifiz_ver)
 background = pygame.image.load("images/background.png")
 illuminationOn = pygame.image.load("images/illuminationOn.png").convert_alpha()
 illuminationOff = pygame.image.load("images/illuminationOff.png").convert_alpha()
+rpm200 = pygame.image.load("images/RPM 200.png").convert_alpha()
+
+
 
 '''Used to manage how fast the screen updates'''
 clock = pygame.time.Clock()
@@ -92,15 +97,24 @@ while running:
     screen.blit(speedtext, (962, 217))
     # Speed in singles
     font_speedunits = pygame.font.Font(font_path, font_size)
-    speedtext = font_speedunits.render("3", 0, indHL)
+    speedtext = font_speedunits.render("8", 0, indHL)
     screen.blit(speedtext, (1104, 217))
     # pygame.display.flip()
 
-    if illuminationState == 1:
-        screen.blit(illuminationOn, (43, 460))
+    # Testing the RPM gauge
+    if rpmstate == 12:
+        screen.blit(rpm200, (132, 4))
+
+
+
+
+    #testing the illumination button
+
+    if illuminationState == 0:
+        screen.blit(illuminationOn, (45, 460))
     #   GPIO.output(lightbarpin, False)
-    else:
-        screen.blit(illuminationOff, (43, 460))
+    #else:
+    #    screen.blit(illuminationOff, (45, 460))
     #   GPIO.output(lightbarpin, True)
     #   pygame.display.update()
 
