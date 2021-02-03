@@ -1,8 +1,10 @@
 
 // GFunkbus76 - Arduino Engine Bay Monitoring System - Oct 2020
-// Currently Managing the following via sensor data
+// Currently managing the following via sensor data
 //  EGT Sensor - https://www.amazon.ca/gp/product/B00OZTNFCW/
-//  Boost Sensor - MAP011 Manifold Absolute Pressure MAP Sensor 038906051
+//  Oil Pressure - 150psi 3-wire Pressure Transducer
+//  Boost Pressure - 100psi 3-wire Pressure Transducer
+//
 
 
 #include <SPI.h>
