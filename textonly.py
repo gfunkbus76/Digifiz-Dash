@@ -1,7 +1,7 @@
 import os
+import serial
 
-#import RPi.GPIO as GPIO
-from typing import Tuple
+#import RPi.GPIO as GPIO from typing import Tuple
 
 '''import constants used by pygame such as event type = QUIT'''
 import pygame.locals
@@ -85,8 +85,20 @@ clock = pygame.time.Clock()
 
 '''Display Font'''
 font_path = "fonts/DSEG7Classic-Bold.ttf"
-font_size = 174
-fontObj = pygame.font.Font(font_path, font_size)
+font_size_big = 174
+font_size_md = 74
+font_size_sml = 50
+#fontObj = pygame.font.Font(font_path, font_size_big)
+
+'''Initalize Serial Port'''
+#ser = serial.Serial ("/dev/ttyAMA0", timeout=0.6) #use this line for raspberry pi 2
+ser = serial.Serial ("/dev/ttyS0", timeout=0.6) #use this line for raspberry pi 3
+ser.baudrate = 57600
+try:
+	ser.flushInput()
+except:
+	print("Error Flushing Serial on boot")
+
 
 # Main Loop
 running = True
@@ -95,30 +107,42 @@ while running:
     # Background image
     screen.blit(background, (0, 0))
 
-    # # # Speedometer Font Testing ###
-    # Speed in hundreds
-    font_speedunits = pygame.font.Font(font_path, font_size)
-    speedtext = font_speedunits.render("1", 1, indHL)
-    #speedtext_rect = speedtext.get_rect()
-    #speedtext_rect.right = 435
-    #screen.blit(speedtext, (828,217), speedtext_rect)
-    screen.blit(speedtext, (281, 131))
-
-    # Speed in tens
-    font_speedunits = pygame.font.Font(font_path, font_size)
-    speedtext = font_speedunits.render("2", 0, indHL)
-    screen.blit(speedtext, (962, 217))
-    # Speed in singles
-    font_speedunits = pygame.font.Font(font_path, font_size)
-    speedtext = font_speedunits.render("8", 0, indHL)
-    screen.blit(speedtext, (1104, 217))
-    # pygame.display.flip()
-
-    # Testing the RPM gauge
-  #  if rpmstate == 12:
-   #     screen.blit(rpm200, (132, 4))
+    # # # Speedometer  Testing ###
+    font_speedunits = pygame.font.Font(font_path, font_size_big)
+    speedtext = font_speedunits.render("22", 1, indHL)
+    screen.blit(speedtext, (209, 135))
 
 
+    # RPM's
+    font_speedunits = pygame.font.Font(font_path, font_size_big)
+    speedtext = font_speedunits.render("5205", 1, indHL)
+    screen.blit(speedtext, (209, 335))
+
+
+    # Coolant Temp
+    font_speedunits = pygame.font.Font(font_path, font_size_md)
+    speedtext = font_speedunits.render("95", 0, indHL)
+    screen.blit(speedtext, (1580, 144))
+
+    # EGT
+    font_speedunits = pygame.font.Font(font_path, font_size_md)
+    speedtext = font_speedunits.render("980", 0, indHL)
+    screen.blit(speedtext, (1580, 240))
+
+    # Oil Press
+    font_speedunits = pygame.font.Font(font_path, font_size_md)
+    speedtext = font_speedunits.render("80", 0, indHL)
+    screen.blit(speedtext, (1580, 336))
+
+    # Boost Press
+    font_speedunits = pygame.font.Font(font_path, font_size_md)
+    speedtext = font_speedunits.render("20.1", 0, indHL)
+    screen.blit(speedtext, (1580, 432))
+
+    # Odometer
+    font_speedunits = pygame.font.Font(font_path, font_size_sml)
+    speedtext = font_speedunits.render("122444", 0, indHL)
+    screen.blit(speedtext, (828, 602))
 
 
     #testing the illumination button
@@ -135,6 +159,10 @@ while running:
         if event.type == pygame.QUIT:
             running = False
     pygame.display.update()
+
+
+    '''Limit screen updates to 20 frames per second so we dont use 100% cpu time'''
+    clock.tick(30)
 
     # screen.fill((255, 0, 0))
     #   pygame.display.update()
