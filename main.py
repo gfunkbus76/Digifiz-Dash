@@ -11,7 +11,7 @@ from threading import Event
 
 from pygame.locals import *
 
-testingStatus = 1
+testingStatus = True
 
 '''Vehicle Information'''
 vehicle_owner = "Gavin"
@@ -568,11 +568,31 @@ while running:
 
     clock.tick(fps)
 
-    if testingStatus == 1:
+    if testingStatus:
         if rpmState < 50:
             rpmState += 1
         else:
             rpmState = 0
+
+        if egtState < 19:
+            egtState += 1
+        else:
+            egtState = 0
+
+        if boostState < 19:
+            boostState += 1
+        else:
+            boostState = 0
+
+        if coolantState < 19:
+            coolantState += 1
+        else:
+            coolantState = 0
+
+        if oilPressureState < 19:
+            oilPressureState += 1
+        else:
+            oilPressureState = 0
 
         if speedTen < 9:
 #            pygame.time.wait(500)
