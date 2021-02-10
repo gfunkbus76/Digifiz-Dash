@@ -1,16 +1,17 @@
-from typing import Union
-
-import pygame, sys, random, os, time, datetime
+import sys, os, time
 
 # import RPi.GPIO as GPIO
-from pygame import Surface
-from pygame.surface import SurfaceType
+# from pygame import Surface
+# from pygame.surface import SurfaceType
 
 '''import constants used by pygame such as event type = QUIT'''
 import pygame.locals
 from datetime import datetime
+from threading import Event
 
 from pygame.locals import *
+
+testingStatus = 1
 
 '''Vehicle Information'''
 vehicle_owner = "Gavin"
@@ -29,29 +30,34 @@ fuelY = 621
 
 '''GPIO State Variables'''
 # 0 is off, 1 is on
-illuminationState = 0
+illuminationState = 1
 foglightState = 0
 highbeamState = 0
 defogState = 0
 leftturnState = 0
 rightturnState = 0
 brakewarnState = 0
-oillightState = 0
+oillightState = 1
 altState = 0
-glowState = 0
-fuelresState = 0
-fuelState = 15
+glowState = 1
+fuelresState = 1
+fuelState = 10
 
 '''Arduino Data'''
 fuel_level_adc_arduino = "0"
 
 '''Gauge State Data'''
-rpmstate = 35
+rpmState = 2
 coolantState = 1
 egtState = 2
 oilPressureState = 3
 boostState = 4
 clockState = 0
+speedHun = 1
+speedTen = 4
+speedOne = 2
+delay = 1
+
 
 # Initialize the pygame
 pygame.init()
@@ -60,7 +66,6 @@ screen = pygame.display.set_mode(size, pygame.DOUBLEBUF)
 '''Pygame Icon'''
 programIcon = pygame.image.load('images/speedometer.png')
 pygame.display.set_icon(programIcon)
-
 
 '''
 Centres the pygame window. Note that the environment variable is called 
@@ -176,10 +181,6 @@ aux02 = pygame.image.load("images/aux02.png").convert_alpha()
 aux01 = pygame.image.load("images/aux01.png").convert_alpha()
 aux00 = pygame.image.load("images/aux00.png").convert_alpha()
 
-
-
-
-
 '''Display Font'''
 font_path = "fonts/DSEG7Classic-Bold.ttf"
 font_size = 174
@@ -194,11 +195,6 @@ clockX = 555
 clockY = 620
 digital_font = pygame.font.Font(font_path, font_lower_size)
 
-
-
-
-
-
 # Main Loop
 running = True
 while running:
@@ -206,7 +202,7 @@ while running:
     '''The code below quits the program if the X button is pressed'''
     for event in pygame.event.get():
         if event.type == QUIT:
-         #   ser.close()
+            #   ser.close()
             pygame.quit()
             sys.exit()
 
@@ -216,11 +212,10 @@ while running:
     screen.blit(background, (0, 0))
     now = datetime.now()
 
-
     ''' Speedometer Font Testing '''
     # Speed in hundreds
     font_speedunits = pygame.font.Font(font_path, font_size)
-    speedtext = font_speedunits.render("1", 1, indHL)
+    speedtext = font_speedunits.render(str(speedHun), 1, indHL)
     # speedtext_rect = speedtext.get_rect()
     # speedtext_rect.right = 435
     # screen.blit(speedtext, (828,217), speedtext_rect)
@@ -228,117 +223,117 @@ while running:
 
     # Speed in tens
     font_speedunits = pygame.font.Font(font_path, font_size)
-    speedtext = font_speedunits.render("2", 0, indHL)
+    speedtext = font_speedunits.render(str(speedTen), 0, indHL)
     screen.blit(speedtext, (962, 217))
 
     # Speed in singles
     font_speedunits = pygame.font.Font(font_path, font_size)
-    speedtext = font_speedunits.render("8", 0, indHL)
+    speedtext = font_speedunits.render(str(speedOne), 0, indHL)
     screen.blit(speedtext, (1104, 217))
     # pygame.display.flip()
 
     ''' RPM '''
-    if rpmstate == 50:
+    if rpmState == 50:
         screen.blit(rpm5000, (135, 5))
-    elif rpmstate == 49:
+    elif rpmState == 49:
         screen.blit(rpm4900, (135, 5))
-    elif rpmstate == 48:
+    elif rpmState == 48:
         screen.blit(rpm4800, (135, 5))
-    elif rpmstate == 47:
+    elif rpmState == 47:
         screen.blit(rpm4700, (135, 5))
-    elif rpmstate == 46:
+    elif rpmState == 46:
         screen.blit(rpm4600, (135, 5))
-    elif rpmstate == 45:
+    elif rpmState == 45:
         screen.blit(rpm4500, (135, 5))
-    elif rpmstate == 44:
+    elif rpmState == 44:
         screen.blit(rpm4400, (135, 5))
-    elif rpmstate == 43:
+    elif rpmState == 43:
         screen.blit(rpm4300, (135, 5))
-    elif rpmstate == 42:
+    elif rpmState == 42:
         screen.blit(rpm4200, (135, 5))
-    elif rpmstate == 41:
+    elif rpmState == 41:
         screen.blit(rpm4100, (135, 5))
-    elif rpmstate == 40:
+    elif rpmState == 40:
         screen.blit(rpm4000, (135, 5))
-    elif rpmstate == 39:
+    elif rpmState == 39:
         screen.blit(rpm3900, (135, 5))
-    elif rpmstate == 38:
+    elif rpmState == 38:
         screen.blit(rpm3800, (135, 5))
-    elif rpmstate == 37:
+    elif rpmState == 37:
         screen.blit(rpm3700, (135, 5))
-    elif rpmstate == 36:
+    elif rpmState == 36:
         screen.blit(rpm3600, (135, 5))
-    elif rpmstate == 35:
+    elif rpmState == 35:
         screen.blit(rpm3500, (135, 5))
-    elif rpmstate == 34:
+    elif rpmState == 34:
         screen.blit(rpm3400, (135, 5))
-    elif rpmstate == 33:
+    elif rpmState == 33:
         screen.blit(rpm3300, (135, 5))
-    elif rpmstate == 32:
+    elif rpmState == 32:
         screen.blit(rpm3200, (135, 5))
-    elif rpmstate == 31:
+    elif rpmState == 31:
         screen.blit(rpm3100, (135, 5))
-    elif rpmstate == 30:
+    elif rpmState == 30:
         screen.blit(rpm3000, (135, 5))
-    elif rpmstate == 29:
+    elif rpmState == 29:
         screen.blit(rpm2900, (135, 5))
-    elif rpmstate == 28:
+    elif rpmState == 28:
         screen.blit(rpm2800, (135, 5))
-    elif rpmstate == 27:
+    elif rpmState == 27:
         screen.blit(rpm2700, (135, 5))
-    elif rpmstate == 26:
+    elif rpmState == 26:
         screen.blit(rpm2600, (135, 5))
-    elif rpmstate == 25:
+    elif rpmState == 25:
         screen.blit(rpm2500, (135, 5))
-    elif rpmstate == 24:
+    elif rpmState == 24:
         screen.blit(rpm2400, (135, 5))
-    elif rpmstate == 23:
+    elif rpmState == 23:
         screen.blit(rpm2300, (135, 5))
-    elif rpmstate == 22:
+    elif rpmState == 22:
         screen.blit(rpm2200, (135, 5))
-    elif rpmstate == 21:
+    elif rpmState == 21:
         screen.blit(rpm2100, (135, 5))
-    elif rpmstate == 20:
+    elif rpmState == 20:
         screen.blit(rpm2000, (135, 5))
-    elif rpmstate == 19:
+    elif rpmState == 19:
         screen.blit(rpm1900, (135, 5))
-    elif rpmstate == 18:
+    elif rpmState == 18:
         screen.blit(rpm1800, (135, 5))
-    elif rpmstate == 17:
+    elif rpmState == 17:
         screen.blit(rpm1700, (135, 5))
-    elif rpmstate == 16:
+    elif rpmState == 16:
         screen.blit(rpm1600, (135, 5))
-    elif rpmstate == 15:
+    elif rpmState == 15:
         screen.blit(rpm1500, (135, 5))
-    elif rpmstate == 14:
+    elif rpmState == 14:
         screen.blit(rpm1400, (135, 5))
-    elif rpmstate == 13:
+    elif rpmState == 13:
         screen.blit(rpm1300, (135, 5))
-    elif rpmstate == 12:
+    elif rpmState == 12:
         screen.blit(rpm1200, (135, 5))
-    elif rpmstate == 11:
+    elif rpmState == 11:
         screen.blit(rpm1100, (135, 5))
-    elif rpmstate == 10:
+    elif rpmState == 10:
         screen.blit(rpm1000, (135, 5))
-    elif rpmstate == 9:
+    elif rpmState == 9:
         screen.blit(rpm900, (135, 5))
-    elif rpmstate == 8:
+    elif rpmState == 8:
         screen.blit(rpm800, (135, 5))
-    elif rpmstate == 7:
+    elif rpmState == 7:
         screen.blit(rpm700, (135, 5))
-    elif rpmstate == 6:
+    elif rpmState == 6:
         screen.blit(rpm600, (135, 5))
-    elif rpmstate == 5:
+    elif rpmState == 5:
         screen.blit(rpm500, (135, 5))
-    elif rpmstate == 4:
+    elif rpmState == 4:
         screen.blit(rpm400, (135, 5))
-    elif rpmstate == 3:
+    elif rpmState == 3:
         screen.blit(rpm300, (135, 5))
-    elif rpmstate == 2:
+    elif rpmState == 2:
         screen.blit(rpm200, (135, 5))
-    elif rpmstate == 1:
+    elif rpmState == 1:
         screen.blit(rpm100, (135, 5))
-    elif rpmstate == 0:
+    elif rpmState == 0:
         screen.blit(rpm000, (135, 5))
 
     '''Coolant Gauge graphics'''
@@ -514,8 +509,8 @@ while running:
     if illuminationState == 0:
         screen.blit(illuminationOff, (45, 460))
     #   GPIO.output(lightbarpin, False)
-    # else:
-    #    screen.blit(illuminationOff, (45, 460))
+    else:
+        screen.blit(illuminationOn, (45, 460))
     #   GPIO.output(lightbarpin, True)
     #   pygame.display.update()
 
@@ -565,12 +560,53 @@ while running:
         screen.blit(glowOn, (1780, 460))
 
     ''' Fuel Gauge Stuffs'''
-    if fuelresState == 0:
-        screen.blit(fuelresOff, (1795, 616))
-    else:
+    #    if fuelresState == 0:
+    if fuelState <= 7:
         screen.blit(fuelresOn, (1795, 616))
+    else:
+        screen.blit(fuelresOff, (1795, 616))
 
     clock.tick(fps)
+
+    if testingStatus == 1:
+        if rpmState < 50:
+            rpmState += 1
+        else:
+            rpmState = 0
+
+        if speedTen < 9:
+#            pygame.time.wait(500)
+            speedTen += 1
+        else:
+            speedTen = 0
+
+        if speedOne < 9:
+            speedOne += 1
+        else:
+            speedOne = 0
+
+        if fuelState >= 70:
+            fuelState -= 1
+
+
+   # rpmState = 50
+
+   # if testingStatus == 1:
+   #     if rpmState > 50:
+    #    rpmState -= 1
+
+#    if testingStatus == 1:
+#        if rpmState < 50:
+#            rpmState += 1
+#        elif rpmState > 0:
+#            rpmState = 0
+
+
+
+   # rpmState = 0
+    #    if rpmState > 50: rpmState = 0
+    #        if rpmState == 50:
+    #           rpmState == 0
 
     '''Calculate  Fuel Level'''
     '''fuel_level_adc_arduino = "0" #note: this value from pi is a raw dump of the adc from 0 to 1024 (630=emplty, 210=full) '''
@@ -588,6 +624,7 @@ while running:
     digital_fuel = fuelState
     fuel_text = digital_font.render(str(int(digital_fuel)), True, fuelHL)
     screen.blit(fuel_text, (fuelX, fuelY))
+
 
 
     '''Clock Stuffs'''
