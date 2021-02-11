@@ -56,7 +56,9 @@ clockState = 0
 speedHun = 1
 speedTen = 4
 speedOne = 2
-delay = 1
+
+delay = 1 # attempting to delay a loop
+direction = 1  # will be 1 for climbing, -1 for falling
 
 
 # Initialize the pygame
@@ -537,7 +539,7 @@ while running:
     if rightturnState == 0:
         screen.blit(rightturnOff, (1220, 460))
     else:
-        screen.blit(rightturnOn, (1220, 460))
+        continue
 
     if brakewarnState == 0:
         screen.blit(brakewarnOff, (1360, 460))
@@ -569,15 +571,30 @@ while running:
     clock.tick(fps)
 
     if testingStatus:
-        if rpmState < 50:
-            rpmState += 1
-        else:
-            rpmState = 0
+        rpmState += direction # always move, in whichever direction
 
-        if egtState < 19:
-            egtState += 1
-        else:
-            egtState = 0
+        # figure out if you need to change direction
+        # Note that these ifs simply won't trigger until it's time to
+        # change.
+        if rpmState == 50:
+            direction = -1
+        elif rpmState == 0:
+            direction = 1
+
+        egtState += direction
+        if egtState == 19:
+            direction = -1
+        elif egtState == 1:
+            direction = 1
+#        if rpmState < 50:
+#            rpmState += 1
+#        else:
+#            rpmState = 0
+
+       # if egtState < 19:
+        #    egtState += 1
+        #else:
+        #    egtState = 0
 
         if boostState < 19:
             boostState += 1
