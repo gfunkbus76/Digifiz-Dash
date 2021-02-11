@@ -57,9 +57,10 @@ speedHun = 1
 speedTen = 4
 speedOne = 2
 
+
 delay = 1 # attempting to delay a loop
 direction = 1  # will be 1 for climbing, -1 for falling
-
+sweepStatus = 0
 
 # Initialize the pygame
 pygame.init()
@@ -580,21 +581,25 @@ while running:
             direction = -1
         elif rpmState == 0:
             direction = 1
+    elif
+            direction = 0
 
-        egtState += direction
-        if egtState == 19:
-            direction = -1
-        elif egtState == 1:
-            direction = 1
-#        if rpmState < 50:
+
+#        egtState += direction
+#        if egtState == 19:
+#            direction = -1
+#        elif egtState == 1:
+#            direction = 1
+#        if rpmState < 19:
 #            rpmState += 1
 #        else:
 #            rpmState = 0
 
-       # if egtState < 19:
-        #    egtState += 1
-        #else:
-        #    egtState = 0
+        if egtState < 19:
+            egtState += 1
+        else:
+            egtState = 0
+
 
         if boostState < 19:
             boostState += 1
