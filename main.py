@@ -571,6 +571,15 @@ while running:
 
     clock.tick(fps)
 
+    '''
+    def testing_status(gauge):
+    gauge += direction
+    if gauge == 50:
+        direction = -1
+    elif gauge == 0:
+        direction = 1 
+    '''
+
     if testingStatus:
         rpmState += direction # always move, in whichever direction
 
@@ -581,8 +590,8 @@ while running:
             direction = -1
         elif rpmState == 0:
             direction = 1
-    elif
-            direction = 0
+        #elif
+        #    direction = 0
 
 
 #        egtState += direction
