@@ -50,6 +50,7 @@ MFA_XY = (1435, 668)
 MFABG_XY = (1021, 563)
 SPEEDO_XY = (1247, 305)
 
+
 #   Gauge State Variables --> need to feed from arduino data
 rpm_status = 0
 coolant_status = 5
