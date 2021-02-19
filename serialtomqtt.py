@@ -3,8 +3,9 @@
 ###################################################################
 #                                                                 #
 # Small script to read data from Arduino serial port and publish  #
-# the data to the specified MQTT topic.                           #
-#                                                                 #
+# the data to the specified MQTT topic.   
+#                         #
+#     https://github.com/norbertuk/Arduino-Serial2MQTT                                                #
 ###################################################################
  
  
