@@ -2,6 +2,8 @@
 
 import pygame
 from datetime import datetime
+import paho.mqtt.subscribe as subscribe
+
 
 testingStatus = True
 
@@ -19,7 +21,7 @@ RED = (255, 0, 0)
 # Title and Icon
 programIcon = pygame.image.load('images/speedometer.png')
 pygame.display.set_icon(programIcon)
-digifiz_ver = ".03 - Feb 17"
+digifiz_ver = ".03 - Feb 19th"
 pygame.display.set_caption("Digifiz Dashboard v" + digifiz_ver)
 
 # Font Information
@@ -69,18 +71,17 @@ speed_status = 8
 illumination_state = 0
 foglight_state = 0
 highbeam_state = 0
-defog_state = 0
+defog_state = 1
 leftturn_state = 0
 rightturn_state = 0
 brakewarn_state = 0
-oillight_state = 0
+oillight_state = 1
 alt_state = 0
 glow_state = 0
 fuelres_state = 0
 
-
-
 gauge_change = 0
+
 
 '''                         LOAD IMAGES                         '''
 
@@ -103,6 +104,10 @@ indicator_images = []
 for i in range(10):
     image = pygame.image.load(("images/indicators/ind" + str(i) + ".png"))
     indicator_images.append(image)
+
+
+def on_message_print(client, userdata, message):
+    print("%s %s" % (message.topic, message.payload))
 
 
 def mileage():
@@ -221,6 +226,7 @@ def active_dash():
 
 
 def main():
+
     run = True
     while run:
         clock.tick(FPS)
@@ -249,7 +255,6 @@ def main():
                 gauge_change = 0
 
         rpm_status += gauge_change
-
         draw_digifiz()
         mileage()
         draw_indicators()
@@ -257,6 +262,8 @@ def main():
         draw_fuel_text()
         draw_speedometer_text()
         pygame.display.update()
+        subscribe.callback(on_message_print, "engine/egt/state", hostname="localhost")
+
     pygame.quit()
 
 
