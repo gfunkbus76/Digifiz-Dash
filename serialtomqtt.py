@@ -1,81 +1,59 @@
-#!/usr/bin/python3
- 
-###################################################################
-#                                                                 #
-# Small script to read data from Arduino serial port and publish  #
-# the data to the specified MQTT topic.   
-#                         #
-#     https://github.com/norbertuk/Arduino-Serial2MQTT                                                #
-###################################################################
- 
- 
-# Need to import some stuff to make magic happen :)
- 
-import serial
+import paho.mqtt.client as mqttClient
 import time
-import paho.mqtt.client as mqtt
-import sys
-import datetime
-ser = serial.Serial('/dev/ttyACM0', 9600 ) # This is the emulated or physical USB port
-time.sleep(2)
- 
-# Variables what you need to change
- 
-datetime = datetime.datetime.now() # This was left from a former script
-username = "your_username"
-password = "your_super_secret_password"
-clientid = "Arduino"
- 
-# Let's connect to my MQTT server 
- 
-mqttc = mqtt.Client(client_id=clientid)
-mqttc.username_pw_set(username, password=password)
-mqttc.connect("127.0.0.1", port=1883, keepalive=60)
-mqttc.loop_start()
- 
-topic_dioda = "v1/" + username + "/things/" + clientid + "/dioda"
-topic_DHTTemp = "v1/" + username + "/things/" + clientid + "/DHTTemp"
-topic_DHTHum = "v1/" + username + "/things/" + clientid + "/DHTHum"
-topic_feny = "v1/" + username + "/things/" + clientid + "/feny"
- 
- 
- 
-while True:
-    try:
-        b = ser.readline()
-        string_n = b.decode()
-        string = string_n.rstrip()
-        
- 
-        if string.startswith("Hum"):
-            print(f"Ez itt a paratartalom {string}")
-            s = (string[7:12]) # want to grab only the numerical value from the string
-            print(s) 
-            s = str(s)            
-            mqttc.publish(topic_DHTHum, payload=s, retain=True) # publish it to the proper topic
-        elif string.startswith("DHT", 4 ):
-            print(f"Ez itt a DHT homerseklet {string}")
-            s1 = (string[8:13])
-            print(s1)
-            mqttc.publish(topic_DHTTemp, payload=s1,retain=True)
-        elif string.startswith("Temp"):
- 
-            print(f"Whoop whoop dioda {string}")
-            s3 = (string[5:10])
-            print(s3)
-            mqttc.publish(topic_dioda, payload=s3,retain=True)
-        elif string.startswith("Feny"):
-            print(f"Ez itt a feny {string}")
-            s4 = (string[6:11])
-            mqttc.publish(topic_feny, payload=s4,retain=True)
-           
-        time.sleep(0.1)
-    except (EOFError, SystemExit, KeyboardInterrupt):
-    
-        print("Interrupt!!")
-        break
-        ser.close()
-        mqttc.disconnect()
-        sys.exit()
- 
- 
+
+
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+
+        print("Connected to broker")
+
+        global Connected  # Use global variable
+        Connected = True  # Signal connection
+
+    else:
+
+        print("Connection failed")
+
+
+def on_message(client, userdata, message):
+    print(message.topic + " " + message.payload.decode())
+
+def on_message_rpm(mosq, obj, message):
+    print(str(message.payload.decode())[0:6])
+
+def on_message_egt(mosq, obj, message):
+    egt_status = str(message.payload.decode())[0:5])
+
+
+Connected = False  # global variable for the state of the connection
+
+broker_address = "localhost"  # Broker address
+port = 1883  # Broker port
+#user = "yourUser"  # Connection username
+#password = "yourPassword"  # Connection password
+
+client = mqttClient.Client("pytest")  # create new instance
+#client.username_pw_set(user, password=password)  # set username and password
+client.on_connect = on_connect  # attach function to callback
+client.on_message = on_message  # attach function to callback
+
+client.connect(broker_address, port=port)  # connect to broker
+
+client.loop_start()  # start the loop
+
+while Connected != True:  # Wait for connection
+    time.sleep(0.1)
+
+client.subscribe("engine/#")
+client.message_callback_add('engine/rpm/state', on_message_rpm)
+client.message_callback_add('engine/egt/state', on_message_egt)
+
+try:
+    while True:
+        time.sleep(1)
+
+except KeyboardInterrupt:
+    print
+    "exiting"
+    client.disconnect()
+    client.loop_stop()

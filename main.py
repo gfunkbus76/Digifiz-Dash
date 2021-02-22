@@ -2,7 +2,8 @@
 
 import pygame
 from datetime import datetime
-import paho.mqtt.subscribe as subscribe
+import paho.mqtt.client as mqttClient
+import time
 
 
 testingStatus = True
@@ -55,13 +56,13 @@ SPEEDO_XY = (1247, 305)
 
 #   Gauge State Variables --> need to feed from arduino data
 rpm_status = 0
-coolant_status = 5
-egt_status = 5
-oilpressure_status = 10
-boost_status = 12
-fuel_status = 4
-outside_temp_status = 22
-speed_status = 8
+coolant_status = 0
+egt_status = 0
+oilpressure_status = 0
+boost_status = 0
+fuel_status = 0
+outside_temp_status = 0
+speed_status = 0
 
 #   Odometer / Tripmeter Data
 
@@ -106,9 +107,122 @@ for i in range(10):
     indicator_images.append(image)
 
 
-def on_message_print(client, userdata, message):
-    print("%s %s" % (message.topic, message.payload))
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
 
+        print("Connected to broker")
+
+        global Connected  # Use global variable
+        Connected = True  # Signal connection
+
+    else:
+
+        print("Connection failed")
+
+
+def on_message(client, userdata, message):
+    print(message.topic + " " + message.payload.decode())
+
+######
+#       ENGINE TOPIC MQTT
+######
+
+def on_message_rpm(mosq, obj, message):
+    #print(str(message.payload.decode())[0:6])
+    global rpm_status
+    global rpm_mqtt
+    rpm_mqtt = int((message.payload.decode())[0:6])
+    rpm_status = rpm_mqtt
+
+def on_message_coolant(mosq, obj, message):
+    #egt_status = (str(message.payload.decode())[0:5])
+    global coolant_status
+    global coolant_mqtt
+    coolant_mqtt = int((message.payload.decode())[0:6])
+    coolant_status = coolant_mqtt
+
+def on_message_egt(mosq, obj, message):
+    #egt_status = (str(message.payload.decode())[0:5])
+    global egt_status
+    global egt_mqtt
+    egt_mqtt = int((message.payload.decode())[0:6])
+    egt_status = egt_mqtt
+
+def on_message_oilpressure(mosq, obj, message):
+    #egt_status = (str(message.payload.decode())[0:5])
+    global oilpressure_status
+    global oilpressure_mqtt
+    oilpressure_mqtt = int((message.payload.decode())[0:6])
+    oilpressure_status = oilpressure_mqtt
+
+def on_message_boost(mosq, obj, message):
+    #print(str(message.payload.decode())[0:6])
+    global boost_status
+    global boost_mqtt
+    boost_mqtt = int((message.payload.decode())[0:6])
+    boost_status = boost_mqtt
+
+######
+#       CABIN TOPIC MQTT
+######
+
+def on_message_speed_cv(mosq, obj, message):
+    global speed_status
+    global speed_cv_mqtt
+    speed_cv_mqtt = int((message.payload.decode())[0:6])
+    speed_status = speed_cv_mqtt
+
+def on_message_speed_gps(mosq, obj, message):
+    global speed_gps_status
+    global speed_gps_mqtt
+    speed_gps_mqtt = int((message.payload.decode())[0:6])
+    speed_gps_status = speed_gps_mqtt
+
+def on_message_outside_temp(mosq, obj, message):
+    global outside_temp_status
+    global outside_temp_mqtt
+    outside_temp_mqtt = int((message.payload.decode())[0:6])
+    outside_temp_status = outside_temp_mqtt
+
+def on_message_fuel(mosq, obj, message):
+    global fuel_status
+    global fuel_mqtt
+    fuel_mqtt = int((message.payload.decode())[0:6])
+    fuel_status = fuel_mqtt
+
+def on_message_speed_cv(mosq, obj, message):
+    global speed_status
+    global speed_cv_mqtt
+    speed_cv_mqtt = int((message.payload.decode())[0:6])
+    speed_status = speed_cv_mqtt
+
+def on_message_speed_gps(mosq, obj, message):
+    global speed_gps_status
+    global speed_gps_mqtt
+    speed_gps_mqtt = int((message.payload.decode())[0:6])
+    speed_gps_status = speed_gps_mqtt
+'''
+class indicators()
+    pass
+
+    illumination_state
+    foglight_state
+    defog_state
+    highbeam_state
+    leftturn_state
+    rightturn_state
+    brakewarn_state
+    oillight_state
+    alt_state
+    glow_state
+    fuel_status
+'''
+
+
+
+######
+#       Varios Functions for Dash
+######
 
 def mileage():
     #   Text File or Odometer and Tripometer Information
@@ -155,6 +269,7 @@ def draw_fuel_text():
     text_rect = fuel_text.get_rect()
     text_rect.midright = 1717, 667
     WIN.blit(fuel_text, text_rect)
+
 
 def draw_speedometer_text():
     ''' Speedometer Font Testing '''
@@ -221,12 +336,21 @@ def draw_digifiz():
     WIN.blit(aux_images[boost_status], BOOST_XY)
 
 
-def active_dash():
+def mqtt_stuff():
     pass
 
-
 def main():
+    broker_address = "localhost"  # Broker address
+    port = 1883  # Broker port
 
+    client = mqttClient.Client("pytest")  # create new instance
+    # client.username_pw_set(user, password=password)  # set username and password
+    client.on_connect = on_connect  # attach function to callback
+    client.on_message = on_message  # attach function to callback
+
+    client.connect(broker_address, port=port)  # connect to broker
+
+    client.loop_start()  # start the loop
     run = True
     while run:
         clock.tick(FPS)
@@ -236,25 +360,27 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
         # Key up to change RPM
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                if rpm_status <= 50:
-                    gauge_change = +1
-                if rpm_status == 50:
-                    gauge_change = 0
-            if event.key == pygame.K_DOWN:
-                if rpm_status <= 50:
-                    gauge_change = -1
-                if rpm_status == 0:
-                    gauge_change = 0
+        if testingStatus == True:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    if rpm_status <= 50:
+                        gauge_change = +1
+                    if rpm_status == 50:
+                        gauge_change = 0
+                if event.key == pygame.K_DOWN:
+                    if rpm_status <= 50:
+                        gauge_change = -1
+                    if rpm_status == 0:
+                        gauge_change = 0
 
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_UP:
-                gauge_change = 0
-            if event.key == pygame.K_DOWN:
-                gauge_change = 0
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_UP:
+                    gauge_change = 0
+                if event.key == pygame.K_DOWN:
+                    gauge_change = 0
 
         rpm_status += gauge_change
+#        rpm_status = on_message_rpm(mosq, obj, messge)
         draw_digifiz()
         mileage()
         draw_indicators()
@@ -262,7 +388,18 @@ def main():
         draw_fuel_text()
         draw_speedometer_text()
         pygame.display.update()
-        subscribe.callback(on_message_print, "engine/egt/state", hostname="localhost")
+        client.subscribe("#")
+        client.message_callback_add('engine/rpm/state', on_message_rpm)
+        client.message_callback_add('engine/egt/state', on_message_egt)
+        client.message_callback_add('engine/oilpressure/state', on_message_oilpressure)
+        client.message_callback_add('engine/boost/state', on_message_boost)
+        client.message_callback_add('engine/coolant/state', on_message_coolant)
+        client.message_callback_add('engine/fuel/state', on_message_fuel)
+        client.message_callback_add('cabin/outside_temp/state', on_message_outside_temp)
+        client.message_callback_add('cabin/speed_cv/state', on_message_speed_cv)
+
+        #on_message_rpm()
+        #rpm_status = str(on_message_rpm)
 
     pygame.quit()
 
