@@ -1,6 +1,6 @@
 """
     Digifiz     v.03
-    Feb 22, 2021
+    Feb 23, 2021
 
     Attempting to code the Digifiz dash project cleaner
     Written by GFunkBus76 in 2021
@@ -10,7 +10,7 @@
 
     Mainly inspired by ManxGauged on github.
     Redefined and cleaned up a bit.
-    Use at your own discetion.
+    Use at your own discretion.
 
     Happy to help you if I can.
 
@@ -33,25 +33,25 @@ testingStatus = True
 
 # Setup Display
 pygame.init()
-WIDTH, HEIGHT = 1920, 720
+WIDTH, HEIGHT = 1920, 720 # use your screens display information
 WIN = pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF)
 
 # Colours
-NEON_YELLOW = (236, 253, 147)
-NEON_GREEN = (145, 213, 89)
-DARK_GREY = (9, 52, 50)
+NEON_YELLOW = (236, 253, 147)   #   Speedo Colour
+NEON_GREEN = (145, 213, 89)     #   Lower gauge colours, clock, odo etc
+DARK_GREY = (9, 52, 50)         #   background of the digits (for the 7segment appearance)
 
 # Title and Icon
 programIcon = pygame.image.load('images/speedometer.png')
 pygame.display.set_icon(programIcon)
-digifiz_ver = ".03 - Feb 19th"
+digifiz_ver = ".03 - Feb 23rd"
 pygame.display.set_caption("Digifiz Dashboard v" + digifiz_ver)
 
 # Font Information
 FONT_PATH = "fonts/DSEG7Classic-Bold.ttf"
-FONT_LARGE = 174
-FONT_MEDIUM = 94
-FONT_SMALL = 67
+FONT_LARGE = 174    #   Speedo size
+FONT_MEDIUM = 94    #   Clock, MFA, Fuel size
+FONT_SMALL = 67     #   Odo Size
 odo_font = pygame.font.Font(FONT_PATH, FONT_SMALL)
 digital_font = pygame.font.Font(FONT_PATH, FONT_MEDIUM)
 font_speedunits = pygame.font.Font(FONT_PATH, FONT_LARGE)
@@ -61,7 +61,7 @@ FPS = 60
 clock = pygame.time.Clock()
 
 '''                        Game Variables                        '''
-#   Locations for gauge graphics
+#   Locations for gauge graphics, each has the same start XY but builds upon it, check images folder
 RPM_XY = (135, 5)
 COOLANT_XY = (1481, 105)
 EGT_XY = (1599, 105)
@@ -87,7 +87,7 @@ speed_status = 0
 
 '''GPIO State Variables'''
 #
-# 0 is off, 1 is active
+# 0 is off, 1 is active -- Fed from the MQTT Server
 illumination_state = 0
 foglight_state = 0
 highbeam_state = 0
@@ -100,6 +100,7 @@ alt_state = 0
 glow_state = 0
 fuelres_state = 0
 
+# For the TestingStatus gauge change feature with the up/down arrows
 gauge_change = 0
 
 '''                         LOAD IMAGES                         '''
@@ -109,21 +110,27 @@ MFA = pygame.image.load("images/indicators/MFA_temp.png").convert_alpha()
 fuelresOn = pygame.image.load("images/indicators/fuelResOn.png").convert_alpha()
 fuelresOff = pygame.image.load("images/indicators/fuelResOff.png").convert_alpha()
 
+#   Creating a list of the image files, 0-50
 rpm_images = []
 for i in range(51):
     image = pygame.image.load("images/rpm/RPM " + str(i) + "00.png")
     rpm_images.append(image)
 
+#   Creating a list of the aux gauge images (1-20)
 aux_images = []
 for i in range(20):
     image = pygame.image.load("images/gauges/aux" + str(i) + ".png")
     aux_images.append(image)
 
+#   Creating the list for the indicator gauges
 indicator_images = []
 for i in range(10):
     image = pygame.image.load(("images/indicators/ind" + str(i) + ".png"))
     indicator_images.append(image)
 
+######
+#       MQTT Connection Function
+######
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
@@ -307,11 +314,12 @@ def on_message_glow(mosq, obj, message):
 
 
 ######
-#       Varios Functions for Dash
+#       Various Functions for Dash
 ######
 
 def mileage():
-    #   Text File or Odometer and Tripometer Information
+    #   Text File or Odometer and Tripometer Information (pulled from ManxGauged project, just reads from text file
+    #   Need to incorporate writing to the file after I figure out how to tabulate the mileage based on GPS or CV
     global odo_font
     odometer = 0
     tripometer = 0
@@ -345,6 +353,9 @@ def mileage():
     text_rect.midright = ODO_L_XY
     WIN.blit(odo_text, text_rect)
 
+#####
+#       Functions for Drawing onto the screen
+#####
 
 def draw_fuel_text():
     global digital_font
@@ -413,23 +424,23 @@ def draw_indicators():
 
 def draw_digifiz():
     WIN.blit(BACKGROUND, (0, 0))
+    #   The below code pulls the list and displays the appropriate image based upon the 'status' of the gauge
     WIN.blit(rpm_images[rpm_status], RPM_XY)
     WIN.blit(aux_images[coolant_status], COOLANT_XY)
     WIN.blit(aux_images[egt_status], EGT_XY)
     WIN.blit(aux_images[oilpressure_status], OILPRESSURE_XY)
     WIN.blit(aux_images[boost_status], BOOST_XY)
 
-
-def mqtt_stuff():
-    pass
-
+#####
+#       Main Function for the Pygame Program
+#####
 
 def main():
+    #   This was pulled off the internet from somewhere, adapted to work with my setup
     broker_address = "localhost"  # Broker address
     port = 1883  # Broker port
 
     client = mqttClient.Client("pytest")  # create new instance
-    # client.username_pw_set(user, password=password)  # set username and password
     client.on_connect = on_connect  # attach function to callback
     client.on_message = on_message  # attach function to callback
 
@@ -439,12 +450,12 @@ def main():
     run = True
     while run:
         clock.tick(FPS)
-        global rpm_status
-        global gauge_change
+        global rpm_status   # for testing status below
+        global gauge_change # for testing status below
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        # Key up to change RPM
+        # Key up to change RPM based upon 'TestingStatus' state at top
         if testingStatus == True:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
@@ -464,8 +475,7 @@ def main():
                 if event.key == pygame.K_DOWN:
                     gauge_change = 0
 
-        rpm_status += gauge_change
-        #        rpm_status = on_message_rpm(mosq, obj, messge)
+        rpm_status += gauge_change # for the testing status sweep above
         draw_digifiz()
         mileage()
         draw_indicators()
@@ -473,7 +483,8 @@ def main():
         draw_fuel_text()
         draw_speedometer_text()
         pygame.display.update()
-        client.subscribe("#")
+        #   MQTT Stuff below
+        client.subscribe("#") #     Subscribes to all topics
         client.message_callback_add('engine/rpm/state', on_message_rpm)
         client.message_callback_add('engine/egt/state', on_message_egt)
         client.message_callback_add('engine/oilpressure/state', on_message_oilpressure)
