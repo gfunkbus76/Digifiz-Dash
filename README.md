@@ -1,4 +1,4 @@
-### NOTE: This is a work in progess, I'm not programmer or git expert, so I update straight to main branch... Sorry! ALSO the arduino code that is currently up is somewhat function but definitely not finalized. That is the next focus.... (feb 2021) ###
+### NOTE: This is a work in progess, I'm not programmer or git expert, so I update straight to main branch... Sorry! ALSO the arduino code that is currently up is somewhat functional but definitely not finalized. That is the next focus.... (feb 2021) ###
 
 # Digifiz-Dash v.03
 ### by GFunkbus76 / aka Gavin
