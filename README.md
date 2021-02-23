@@ -1,8 +1,8 @@
 ### NOTE: This is a work in progess, I'm not programmer or git expert, so I update strait to main branch... Sorry! ###
 
-### Digifiz-Dash v.03
-# by GFunkbus76 / aka Gavin
-# Check out http://www.youtube.com/GFunkbus76
+# Digifiz-Dash v.03
+### by GFunkbus76 / aka Gavin
+## Check out http://www.youtube.com/GFunkbus76
 
  A pygame Dashboard mimicing the VW Digifiz Dash of the 80s. Powered by Raspberry pi4 and arduinos. This project was inspired by ManxGauged (on github) as well as supported by numerous online tutorials and google searches, I'm a cut, paste, edit and run coder... so beware. Sorry if I've used your experience and not thanked you! Tech with Tim, Coding by Mosh, Rik Cross and Christian Duenes on youtube all had good content I think! Thanks to DONE with ConsultDash(github) for some intial inspiration as well as Everlanders(youtube) oh yeah, also This Old Bus (has a canbus/node-red setup!).
  
