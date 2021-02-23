@@ -14,12 +14,12 @@
  
 **This project has a few main areas:** 
   -Hardware 
-      -Raspberry Pi 4, 4gb as main computer
-      -Arduino Mega in engine bay transmitting via canbus currently (EGT, RPM, Boost, Oil Pressure, Coolant Temp, etc)
-      -Arduino Nano in front to receive and interpret canbus signals, connected to RPi via serial usb
-      -2nd Arduino Nano in cabin will probably function to do a variety of other sensors(ambient temp, gps, speedometer sensor)
-      -2x LCD Screens, 1x 7" Touch for the headunit, 1x 12.3" stretched LCD for the dashboard cluster
-      -Various sensors and modules (GPS, EGT, Pressure Transducers, optoisolators, buck converters etc)
+      #-Raspberry Pi 4, 4gb as main computer
+      #-Arduino Mega in engine bay transmitting via canbus currently (EGT, RPM, Boost, Oil Pressure, Coolant Temp, etc)
+      #-Arduino Nano in front to receive and interpret canbus signals, connected to RPi via serial usb
+      #-2nd Arduino Nano in cabin will probably function to do a variety of other sensors(ambient temp, gps, speedometer sensor)
+      #-2x LCD Screens, 1x 7" Touch for the headunit, 1x 12.3" stretched LCD for the dashboard cluster
+      #-Various sensors and modules (GPS, EGT, Pressure Transducers, optoisolators, buck converters etc)
   -Software
       -OpenAutoPro (use Coupon Code oap_2020 to save 5%) - I use this to manage the headunit and Android Auto portion
       -Digifiz Dash (main.py) - this is the main python/pygame code to run the dash
