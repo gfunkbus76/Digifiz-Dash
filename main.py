@@ -1,11 +1,34 @@
-# Tech With Tim Tutorial
+"""
+    Digifiz     v.03
+    Feb 22, 2021
+
+    Attempting to code the Digifiz dash project cleaner
+    Written by GFunkBus76 in 2021
+
+    Opensource and designed from many online projects...
+    Copy, paste, run, debug... repeat lol.
+
+    Mainly inspired by ManxGauged on github.
+    Redefined and cleaned up a bit.
+    Use at your own discetion.
+
+    Happy to help you if I can.
+
+    https://github.com/gfunkbus76
+
+"""
 
 import pygame
 from datetime import datetime
 import paho.mqtt.client as mqttClient
-import time
+
+#   Import pygame, for main graphics functions
+#   Date time is for the clock and perhaps MQTT
+#   Paho to handle the MQTT subscription from Node-Red
 
 
+#   Currently enables RPM to rise and fall with keyboard up and down presses.
+#   Will potentially change this in future to have full gauge functionality.
 testingStatus = True
 
 # Setup Display
@@ -17,7 +40,6 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF)
 NEON_YELLOW = (236, 253, 147)
 NEON_GREEN = (145, 213, 89)
 DARK_GREY = (9, 52, 50)
-RED = (255, 0, 0)
 
 # Title and Icon
 programIcon = pygame.image.load('images/speedometer.png')
@@ -39,7 +61,7 @@ FPS = 60
 clock = pygame.time.Clock()
 
 '''                        Game Variables                        '''
-#   Locations
+#   Locations for gauge graphics
 RPM_XY = (135, 5)
 COOLANT_XY = (1481, 105)
 EGT_XY = (1599, 105)
@@ -48,13 +70,12 @@ BOOST_XY = (1822, 105)
 CLOCK_XY = (555, 620)
 FUEL_XY = (1560, 620)
 ODO_XY = (60, 644)
-ODO_L_XY = (395,678)
+ODO_L_XY = (395, 678)
 MFA_XY = (1435, 668)
 MFABG_XY = (1021, 563)
 SPEEDO_XY = (1247, 305)
 
-
-#   Gauge State Variables --> need to feed from arduino data
+#   Gauge State Variables --> fed from local MQTT Server
 rpm_status = 0
 coolant_status = 0
 egt_status = 0
@@ -64,25 +85,22 @@ fuel_status = 0
 outside_temp_status = 0
 speed_status = 0
 
-#   Odometer / Tripmeter Data
-
-
 '''GPIO State Variables'''
-# 0 is off, 1 is on
+#
+# 0 is off, 1 is active
 illumination_state = 0
 foglight_state = 0
 highbeam_state = 0
-defog_state = 1
+defog_state = 0
 leftturn_state = 0
 rightturn_state = 0
 brakewarn_state = 0
-oillight_state = 1
+oillight_state = 0
 alt_state = 0
 glow_state = 0
 fuelres_state = 0
 
 gauge_change = 0
-
 
 '''                         LOAD IMAGES                         '''
 
@@ -123,44 +141,50 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, message):
     print(message.topic + " " + message.payload.decode())
 
+
 ######
 #       ENGINE TOPIC MQTT
 ######
 
 def on_message_rpm(mosq, obj, message):
-    #print(str(message.payload.decode())[0:6])
+    # print(str(message.payload.decode())[0:6])
     global rpm_status
     global rpm_mqtt
     rpm_mqtt = int((message.payload.decode())[0:6])
     rpm_status = rpm_mqtt
 
+
 def on_message_coolant(mosq, obj, message):
-    #egt_status = (str(message.payload.decode())[0:5])
+    # egt_status = (str(message.payload.decode())[0:5])
     global coolant_status
     global coolant_mqtt
     coolant_mqtt = int((message.payload.decode())[0:6])
     coolant_status = coolant_mqtt
 
+
 def on_message_egt(mosq, obj, message):
-    #egt_status = (str(message.payload.decode())[0:5])
+    # egt_status = (str(message.payload.decode())[0:5])
     global egt_status
     global egt_mqtt
     egt_mqtt = int((message.payload.decode())[0:6])
     egt_status = egt_mqtt
 
+
 def on_message_oilpressure(mosq, obj, message):
-    #egt_status = (str(message.payload.decode())[0:5])
+    # egt_status = (str(message.payload.decode())[0:5])
     global oilpressure_status
     global oilpressure_mqtt
     oilpressure_mqtt = int((message.payload.decode())[0:6])
     oilpressure_status = oilpressure_mqtt
 
+
 def on_message_boost(mosq, obj, message):
-    #print(str(message.payload.decode())[0:6])
+    # print(str(message.payload.decode())[0:6])
     global boost_status
     global boost_mqtt
     boost_mqtt = int((message.payload.decode())[0:6])
     boost_status = boost_mqtt
+
 
 ######
 #       CABIN TOPIC MQTT
@@ -172,11 +196,13 @@ def on_message_speed_cv(mosq, obj, message):
     speed_cv_mqtt = int((message.payload.decode())[0:6])
     speed_status = speed_cv_mqtt
 
+
 def on_message_speed_gps(mosq, obj, message):
     global speed_gps_status
     global speed_gps_mqtt
     speed_gps_mqtt = int((message.payload.decode())[0:6])
     speed_gps_status = speed_gps_mqtt
+
 
 def on_message_outside_temp(mosq, obj, message):
     global outside_temp_status
@@ -184,11 +210,13 @@ def on_message_outside_temp(mosq, obj, message):
     outside_temp_mqtt = int((message.payload.decode())[0:6])
     outside_temp_status = outside_temp_mqtt
 
+
 def on_message_fuel(mosq, obj, message):
     global fuel_status
     global fuel_mqtt
     fuel_mqtt = int((message.payload.decode())[0:6])
     fuel_status = fuel_mqtt
+
 
 def on_message_speed_cv(mosq, obj, message):
     global speed_status
@@ -196,28 +224,86 @@ def on_message_speed_cv(mosq, obj, message):
     speed_cv_mqtt = int((message.payload.decode())[0:6])
     speed_status = speed_cv_mqtt
 
+
 def on_message_speed_gps(mosq, obj, message):
     global speed_gps_status
     global speed_gps_mqtt
     speed_gps_mqtt = int((message.payload.decode())[0:6])
     speed_gps_status = speed_gps_mqtt
-'''
-class indicators()
-    pass
 
-    illumination_state
-    foglight_state
-    defog_state
-    highbeam_state
-    leftturn_state
-    rightturn_state
-    brakewarn_state
-    oillight_state
-    alt_state
-    glow_state
-    fuel_status
-'''
 
+######
+#       INDICATOR TOPIC MQTT
+######
+
+def on_message_illumination(mosq, obj, message):
+    global illumination_state
+    global illumination_mqtt
+    illumination_mqtt = int((message.payload.decode())[0:6])
+    illumination_state = illumination_mqtt
+
+
+def on_message_foglight(mosq, obj, message):
+    global foglight_state
+    global foglight_mqtt
+    foglight_mqtt = int((message.payload.decode())[0:6])
+    foglight_state = foglight_mqtt
+
+
+def on_message_defog(mosq, obj, message):
+    global defog_state
+    global defog_mqtt
+    defog_mqtt = int((message.payload.decode())[0:6])
+    defog_state = defog_mqtt
+
+
+def on_message_highbeam(mosq, obj, message):
+    global highbeam_state
+    global highbeam_mqtt
+    highbeam_mqtt = int((message.payload.decode())[0:6])
+    highbeam_state = highbeam_mqtt
+
+
+def on_message_leftturn(mosq, obj, message):
+    global leftturn_state
+    global leftturn_mqtt
+    leftturn_mqtt = int((message.payload.decode())[0:6])
+    leftturn_state = leftturn_mqtt
+
+
+def on_message_rightturn(mosq, obj, message):
+    global rightturn_state
+    global rightturn_mqtt
+    rightturn_mqtt = int((message.payload.decode())[0:6])
+    rightturn_state = rightturn_mqtt
+
+
+def on_message_brakewarn(mosq, obj, message):
+    global brakewarn_state
+    global brakewarn_mqtt
+    brakewarn_mqtt = int((message.payload.decode())[0:6])
+    brakewarn_state = brakewarn_mqtt
+
+
+def on_message_oillight(mosq, obj, message):
+    global oillight_state
+    global oillight_mqtt
+    oillight_mqtt = int((message.payload.decode())[0:6])
+    oillight_state = oillight_mqtt
+
+
+def on_message_alt(mosq, obj, message):
+    global alt_state
+    global alt_mqtt
+    alt_mqtt = int((message.payload.decode())[0:6])
+    alt_state = alt_mqtt
+
+
+def on_message_glow(mosq, obj, message):
+    global glow_state
+    global glow_mqtt
+    glow_mqtt = int((message.payload.decode())[0:6])
+    glow_state = glow_mqtt
 
 
 ######
@@ -253,13 +339,11 @@ def mileage():
         error_reading_odo_from_file = 1
     odofile.close()
 
-
     digital_odo = odometer
     odo_text = odo_font.render(str(digital_odo), True, NEON_GREEN)
     text_rect = odo_text.get_rect()
     text_rect.midright = ODO_L_XY
     WIN.blit(odo_text, text_rect)
-
 
 
 def draw_fuel_text():
@@ -339,6 +423,7 @@ def draw_digifiz():
 def mqtt_stuff():
     pass
 
+
 def main():
     broker_address = "localhost"  # Broker address
     port = 1883  # Broker port
@@ -380,7 +465,7 @@ def main():
                     gauge_change = 0
 
         rpm_status += gauge_change
-#        rpm_status = on_message_rpm(mosq, obj, messge)
+        #        rpm_status = on_message_rpm(mosq, obj, messge)
         draw_digifiz()
         mileage()
         draw_indicators()
@@ -397,9 +482,16 @@ def main():
         client.message_callback_add('engine/fuel/state', on_message_fuel)
         client.message_callback_add('cabin/outside_temp/state', on_message_outside_temp)
         client.message_callback_add('cabin/speed_cv/state', on_message_speed_cv)
-
-        #on_message_rpm()
-        #rpm_status = str(on_message_rpm)
+        client.message_callback_add('indicator/illumination/state', on_message_illumination)
+        client.message_callback_add('indicator/foglight/state', on_message_foglight)
+        client.message_callback_add('indicator/defog/state', on_message_defog)
+        client.message_callback_add('indicator/highbeam/state', on_message_highbeam)
+        client.message_callback_add('indicator/leftturn/state', on_message_leftturn)
+        client.message_callback_add('indicator/rightturn/state', on_message_rightturn)
+        client.message_callback_add('indicator/brakewarn/state', on_message_brakewarn)
+        client.message_callback_add('indicator/oillight/state', on_message_oillight)
+        client.message_callback_add('indicator/alt/state', on_message_alt)
+        client.message_callback_add('indicator/glow/state', on_message_glow)
 
     pygame.quit()
 
