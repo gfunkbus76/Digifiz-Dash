@@ -44,4 +44,5 @@
     -Not at all connected to or involved with VW. Using their logo for use in a VW with respect and admiration! Be gone lawyers!
     -This is not a tested or complete project, it represents  work-in-progress and should be treated as such.
     -Please check your local laws and guidelines if you wish to install this in a vehicle ....
-    ----USE AT YOUR OWN RISK!----
+    
+    #----USE AT YOUR OWN RISK!----
