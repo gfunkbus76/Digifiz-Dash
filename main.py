@@ -23,7 +23,9 @@ import pygame
 from datetime import datetime
 import paho.mqtt.client as mqttClient
 from battery.VBatGauge import VbatGauge
-from boost.BoostGauge import BoostGauge
+from aux_gauge.AuxGauge import AuxGauge
+from rpm.RpmGauge import RpmGauge
+from constants import *
 
 #   Import pygame, for main graphics functions
 #   Date time is for the clock and perhaps MQTT
@@ -36,49 +38,25 @@ testingStatus = True
 
 # Setup Display
 pygame.init()
-WIDTH, HEIGHT = 1920, 720 # use your screens display information
 WIN = pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF)
 
-# Colours
-NEON_YELLOW = (236, 253, 147)   #   Speedo Colour
-NEON_GREEN = (145, 213, 89)     #   Lower gauge colours, clock, odo etc
-DARK_GREY = (9, 52, 50)         #   background of the digits (for the 7segment appearance)
-
 # Title and Icon
-programIcon = pygame.image.load('images/speedometer.png')
+programIcon = pygame.image.load(ICON)
 pygame.display.set_icon(programIcon)
+
 digifiz_ver = ".03 - Feb 23rd"
 pygame.display.set_caption("Digifiz Dashboard v" + digifiz_ver)
 
 # Font Information
-FONT_PATH = "fonts/DSEG7Classic-Bold.ttf"
-FONT_LARGE = 174    #   Speedo size
-FONT_MEDIUM = 94    #   Clock, MFA, Fuel size
-FONT_SMALL = 67     #   Odo Size
 odo_font = pygame.font.Font(FONT_PATH, FONT_SMALL)
 digital_font = pygame.font.Font(FONT_PATH, FONT_MEDIUM)
 font_speedunits = pygame.font.Font(FONT_PATH, FONT_LARGE)
 
 # Setup Game Loop
-FPS = 60
 clock = pygame.time.Clock()
 
 '''                        Game Variables                        '''
-#   Locations for gauge graphics, each has the same start XY but builds upon it, check images folder
-RPM_XY = (135, 5)
-COOLANT_XY = (1481, 105)
-EGT_XY = (1599, 105)
-OILPRESSURE_XY = (1711, 105)
-#boost gauge
-boost = BoostGauge(1822, 105)
-BOOST_XY = (1822, 105)
-CLOCK_XY = (555, 620)
-FUEL_XY = (1560, 620)
-ODO_XY = (60, 644)
-ODO_L_XY = (395, 678)
-MFA_XY = (1435, 668)
-MFABG_XY = (1021, 563)
-SPEEDO_XY = (1247, 305)
+
 
 #   Gauge State Variables --> fed from local MQTT Server
 rpm_status = 0
@@ -89,6 +67,7 @@ boost_status = 0
 fuel_status = 0
 outside_temp_status = 0
 speed_status = 0
+
 
 '''GPIO State Variables'''
 #
@@ -110,7 +89,7 @@ gauge_change = 0
 
 '''                         LOAD IMAGES                         '''
 
-BACKGROUND = pygame.image.load("images/background.png").convert_alpha()
+BACKGROUND = pygame.image.load(BG).convert_alpha()
 MFA = pygame.image.load("images/indicators/MFA_temp.png").convert_alpha()
 fuelresOn = pygame.image.load("images/indicators/fuelResOn.png").convert_alpha()
 fuelresOff = pygame.image.load("images/indicators/fuelResOff.png").convert_alpha()
@@ -120,13 +99,13 @@ rpm_images = []
 for i in range(51):
     image = pygame.image.load("images/rpm/RPM " + str(i) + "00.png")
     rpm_images.append(image)
-
+'''
 #   Creating a list of the aux gauge images (1-20)
 aux_images = []
 for i in range(20):
     image = pygame.image.load("images/gauges/aux" + str(i) + ".png")
     aux_images.append(image)
-
+'''
 #   Creating the list for the indicator gauges
 indicator_images = []
 for i in range(10):
@@ -418,17 +397,28 @@ def draw_digifiz():
     WIN.blit(BACKGROUND, (0, 0))
     #   The below code pulls the list and displays the appropriate image based upon the 'status' of the gauge
     WIN.blit(rpm_images[rpm_status], RPM_XY)
-    WIN.blit(aux_images[coolant_status], COOLANT_XY)
-    WIN.blit(aux_images[egt_status], EGT_XY)
-    WIN.blit(aux_images[oilpressure_status], OILPRESSURE_XY)
-#   boost.show(WIN)
+
+#    WIN.blit(aux_images[coolant_status], COOLANT_XY)
+#    WIN.blit(aux_images[egt_status], EGT_XY)
+#    WIN.blit(aux_images[oilpressure_status], OILPRESSURE_XY)
+#    boost.show(WIN)
 #    WIN.blit(aux_images[boost_status], BOOST_XY)
+
+
 
 #####
 #       Main Function for the Pygame Program
 #####
 
 def main():
+    global rpm_status
+    # boost gauge
+    boost = AuxGauge(BOOST_XY, 19, boost_status)
+    egt = AuxGauge(EGT_XY, 19, egt_status)
+    coolant = AuxGauge(COOLANT_XY, 19, coolant_status)
+    oilpressure = AuxGauge(OILPRESSURE_XY, 19, oilpressure_status)
+#    rpm = RpmGauge(RPM_XY, 50, rpm_status)
+
     #   This was pulled off the internet from somewhere, adapted to work with my setup
     broker_address = "localhost"  # Broker address
     port = 1883  # Broker port
@@ -443,7 +433,7 @@ def main():
     run = True
     while run:
         clock.tick(FPS)
-        global rpm_status   # for testing status below
+ #       global rpm_status   # for testing status below
         global gauge_change # for testing status below
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -475,7 +465,12 @@ def main():
         draw_clock_temp()
         draw_fuel_text()
         draw_speedometer_text()
+#        rpm.show(WIN)
+        coolant.show(WIN)
+        egt.show(WIN)
         boost.show(WIN)
+        oilpressure.show(WIN)
+
         pygame.display.update()
         #   MQTT Stuff below
         client.subscribe("#") #     Subscribes to all topics

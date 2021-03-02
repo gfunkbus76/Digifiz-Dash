@@ -6,7 +6,7 @@ from pygame.locals import *
 global testingStatus
 testingStatus = True
 
-class RpmGauge:
+class AuxGauge:
 	def __init__(self, posxy, qty, status):
 		self.posxy = posxy
 		self.qty = qty
@@ -20,11 +20,11 @@ class RpmGauge:
 		return self.image
 
 	def set_image(self, status):
-		rpm_images = []
-		for i in range(51):
-			image = str(status) + "00.png"
-			self.image = pygame.image.load("images/rpm/RPM " + image)
-			rpm_images.append(image)
+		aux_images = []
+		for i in range(20):
+			image = str(status) + ".png"
+			self.image = pygame.image.load("images/gauges/aux" + image)
+			aux_images.append(image)
 #		image = str(frame)+".png"
 #		self.image = pygame.image.load('images/gauges/aux' + image)
 
