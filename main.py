@@ -94,12 +94,13 @@ MFA = pygame.image.load("images/indicators/MFA_temp.png").convert_alpha()
 fuelresOn = pygame.image.load("images/indicators/fuelResOn.png").convert_alpha()
 fuelresOff = pygame.image.load("images/indicators/fuelResOff.png").convert_alpha()
 
+'''
 #   Creating a list of the image files, 0-50
 rpm_images = []
 for i in range(51):
     image = pygame.image.load("images/rpm/RPM " + str(i) + "00.png")
     rpm_images.append(image)
-'''
+
 #   Creating a list of the aux gauge images (1-20)
 aux_images = []
 for i in range(20):
@@ -396,7 +397,7 @@ def draw_indicators():
 def draw_digifiz():
     WIN.blit(BACKGROUND, (0, 0))
     #   The below code pulls the list and displays the appropriate image based upon the 'status' of the gauge
-    WIN.blit(rpm_images[rpm_status], RPM_XY)
+#    WIN.blit(rpm_images[rpm_status], RPM_XY)
 
 #    WIN.blit(aux_images[coolant_status], COOLANT_XY)
 #    WIN.blit(aux_images[egt_status], EGT_XY)
@@ -417,7 +418,7 @@ def main():
     egt = AuxGauge(EGT_XY, 19, egt_status)
     coolant = AuxGauge(COOLANT_XY, 19, coolant_status)
     oilpressure = AuxGauge(OILPRESSURE_XY, 19, oilpressure_status)
-#    rpm = RpmGauge(RPM_XY, 50, rpm_status)
+    rpm = RpmGauge(RPM_XY, 50, rpm_status)
 
     #   This was pulled off the internet from somewhere, adapted to work with my setup
     broker_address = "localhost"  # Broker address
@@ -458,14 +459,14 @@ def main():
                 if event.key == pygame.K_DOWN:
                     gauge_change = 0
 
-        rpm_status += gauge_change # for the testing status sweep above
+#        rpm_status += gauge_change # for the testing status sweep above
         draw_digifiz()
         mileage()
         draw_indicators()
         draw_clock_temp()
         draw_fuel_text()
         draw_speedometer_text()
-#        rpm.show(WIN)
+        rpm.show(WIN)
         coolant.show(WIN)
         egt.show(WIN)
         boost.show(WIN)

@@ -1,10 +1,9 @@
 import pygame
-import os 
+from constants import *
 from pygame.locals import *
 # THIS IS FOR A BOOST GAUGE
 
-global testingStatus
-testingStatus = True
+
 
 class RpmGauge:
 	def __init__(self, posxy, qty, status):
@@ -41,7 +40,7 @@ class RpmGauge:
 	def show(self, screen):
 		screen.blit(self.get_image(), self.get_pos())
 		if testingStatus == True:
-			if self.get_frame() == 19:
+			if self.get_frame() == self.qty:
 				self.grw_flag = False
 			if self.get_frame() == 0:
 				self.grw_flag = True

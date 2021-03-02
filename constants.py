@@ -12,7 +12,7 @@ DARK_GREY = (9, 52, 50)         #   background of the digits (for the 7segment a
 #   Game Images
 ICON = "images/speedometer.png"
 BG = "images/background.png"
-
+testingStatus = True
 #   Font Details
 FONT_PATH = "fonts/DSEG7Classic-Bold.ttf"
 FONT_LARGE = 174    #   Speedo size
