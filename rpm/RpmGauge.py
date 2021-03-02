@@ -3,7 +3,8 @@ from constants import *
 from pygame.locals import *
 # THIS IS FOR A BOOST GAUGE
 
-
+global rpm_status
+rpm_status = 0
 
 class RpmGauge:
 	def __init__(self, posxy, qty, status):
@@ -21,7 +22,7 @@ class RpmGauge:
 	def set_image(self, status):
 		rpm_images = []
 		for i in range(51):
-			image = str(status) + "00.png"
+			image = str(rpm_status) + "00.png"
 			self.image = pygame.image.load("images/rpm/RPM " + image)
 			rpm_images.append(image)
 #		image = str(frame)+".png"
