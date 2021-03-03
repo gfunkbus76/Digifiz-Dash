@@ -4,39 +4,42 @@ from pygame.locals import *
 # THIS IS FOR A BOOST GAUGE
 
 global testingStatus
-testingStatus = True
+testingStatus = False
 
 class AuxGauge:
-	def __init__(self, posxy, qty, status):
+	def __init__(self, posxy, qty):
 		self.posxy = posxy
 		self.qty = qty
-		self.status = status
 		self.image = 0
-		self.status = 0
-		self.set_image(self.status)
+		self.frame = 0
+		self.set_image(self.frame)
 		self.grw_flag = True
 
 	def get_image(self):
 		return self.image
 
-	def set_image(self, status):
-		aux_images = []
+	def set_image(self, frame):
+		image = str(frame)+".png"
+		self.image = pygame.image.load('images/gauges/aux' + image)
+
+
+		'''aux_images = []
 		for i in range(20):
-			image = str(status) + ".png"
+			image = str(frame) + ".png"
 			self.image = pygame.image.load("images/gauges/aux" + image)
 			aux_images.append(image)
 #		image = str(frame)+".png"
-#		self.image = pygame.image.load('images/gauges/aux' + image)
+#		self.image = pygame.image.load('images/gauges/aux' + image)'''
 
 	def get_pos(self):
 		return (self.posxy)
 
-	def set_frame(self, status):
-		self.status = status
-		self.set_image(status)
+	def set_frame(self, frame):
+		self.frame = frame
+		self.set_image(frame)
 
 	def get_frame(self):
-		return self.status
+		return self.frame
 
 	def show(self, screen):
 		screen.blit(self.get_image(), self.get_pos())

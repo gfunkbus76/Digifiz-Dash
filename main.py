@@ -26,6 +26,7 @@ from battery.VBatGauge import VbatGauge
 from aux_gauge.AuxGauge import AuxGauge
 from rpm.RpmGauge import RpmGauge
 from constants import *
+from gauges import Gauge
 
 #   Import pygame, for main graphics functions
 #   Date time is for the clock and perhaps MQTT
@@ -57,16 +58,22 @@ clock = pygame.time.Clock()
 
 '''                        Game Variables                        '''
 
+boost = AuxGauge(BOOST_XY, 19)
+egt = AuxGauge(EGT_XY, 19)
+coolant = AuxGauge(COOLANT_XY, 19)
+oilpressure = AuxGauge(OILPRESSURE_XY, 19)
 
 #   Gauge State Variables --> fed from local MQTT Server
 rpm_status = 0
 coolant_status = 0
-egt_status = 0
+#egt_status = 0
+egt_status = egt.get_frame()
 oilpressure_status = 0
 boost_status = 0
 fuel_status = 0
 outside_temp_status = 0
 speed_status = 0
+
 
 
 '''GPIO State Variables'''
@@ -94,13 +101,13 @@ MFA = pygame.image.load("images/indicators/MFA_temp.png").convert_alpha()
 fuelresOn = pygame.image.load("images/indicators/fuelResOn.png").convert_alpha()
 fuelresOff = pygame.image.load("images/indicators/fuelResOff.png").convert_alpha()
 
-'''
+
 #   Creating a list of the image files, 0-50
 rpm_images = []
 for i in range(51):
     image = pygame.image.load("images/rpm/RPM " + str(i) + "00.png")
     rpm_images.append(image)
-
+'''
 #   Creating a list of the aux gauge images (1-20)
 aux_images = []
 for i in range(20):
@@ -161,6 +168,7 @@ def on_message_egt(digi, obj, message):
     global egt_mqtt
     egt_mqtt = int((message.payload.decode())[0:6])
     egt_status = egt_mqtt
+    #egt_status = gauge1.status
 
 
 def on_message_oilpressure(digi, obj, message):
@@ -396,8 +404,12 @@ def draw_indicators():
 
 def draw_digifiz():
     WIN.blit(BACKGROUND, (0, 0))
+#    egt_status = egt.get_frame()
+
+    print("EGT Status:" + str(egt_status))
+    print("egt get frame:" + str(egt.get_frame()))
     #   The below code pulls the list and displays the appropriate image based upon the 'status' of the gauge
-#    WIN.blit(rpm_images[rpm_status], RPM_XY)
+    WIN.blit(rpm_images[rpm_status], RPM_XY)
 
 #    WIN.blit(aux_images[coolant_status], COOLANT_XY)
 #    WIN.blit(aux_images[egt_status], EGT_XY)
@@ -413,12 +425,17 @@ def draw_digifiz():
 
 def main():
     global rpm_status
+    global oilpressure_status
+    global egt_status
+
+#    egt_status += egt.get_frame()
+
     # boost gauge
-    boost = AuxGauge(BOOST_XY, 19, boost_status)
-    egt = AuxGauge(EGT_XY, 19, egt_status)
-    coolant = AuxGauge(COOLANT_XY, 19, coolant_status)
-    oilpressure = AuxGauge(OILPRESSURE_XY, 19, oilpressure_status)
-    rpm = RpmGauge(RPM_XY, 50, rpm_status)
+
+    #oilpressure_status = oilpressure.status()
+    #rpm = RpmGauge(RPM_XY, 50, rpm_status)
+
+
 
     #   This was pulled off the internet from somewhere, adapted to work with my setup
     broker_address = "localhost"  # Broker address
@@ -460,19 +477,20 @@ def main():
                     gauge_change = 0
 
 #        rpm_status += gauge_change # for the testing status sweep above
+        #egt_status = egt.get_frame()
         draw_digifiz()
         mileage()
         draw_indicators()
         draw_clock_temp()
         draw_fuel_text()
         draw_speedometer_text()
-        rpm.show(WIN)
+        #rpm.show(WIN)
         coolant.show(WIN)
-        egt.show(WIN)
+        #gauge1.show(WIN)
         boost.show(WIN)
         oilpressure.show(WIN)
 
-        pygame.display.update()
+
         #   MQTT Stuff below
         client.subscribe("#") #     Subscribes to all topics
         client.message_callback_add('engine/rpm/state', on_message_rpm)
@@ -493,7 +511,11 @@ def main():
         client.message_callback_add('indicator/oillight/state', on_message_oillight)
         client.message_callback_add('indicator/alt/state', on_message_alt)
         client.message_callback_add('indicator/glow/state', on_message_glow)
+        egt.show(WIN)
+        #egt_status = egt.get_frame()
+        #egt.set_frame(egt.get_frame() = int(egt_status))
 
+        pygame.display.update()
     pygame.quit()
 
 
