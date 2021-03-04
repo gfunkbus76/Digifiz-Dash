@@ -8,7 +8,7 @@
     Opensource and designed from many online projects...
     Copy, paste, run, debug... repeat lol.
 
-    Mainly inspired by ManxGauged on github.
+    Mainly inspired by ManxGauged and miata-dash on github.
     Redefined and cleaned up a bit.
     Use at your own discretion.
 
@@ -34,7 +34,7 @@ from gauges import Gauge
 
 #   Currently enables RPM to rise and fall with keyboard up and down presses.
 #   Will potentially change this in future to have full gauge functionality.
-testingStatus = True
+#   testingStatus = False
 
 # Setup Display
 pygame.init()
@@ -44,7 +44,7 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF)
 programIcon = pygame.image.load(ICON)
 pygame.display.set_icon(programIcon)
 
-digifiz_ver = ".03 - Feb 23rd"
+digifiz_ver = ".04 - March 4th"
 pygame.display.set_caption("Digifiz Dashboard v" + digifiz_ver)
 
 # Font Information
@@ -423,6 +423,9 @@ def main():
                 rpm_status + 1
             else:
                 rpm_status - 1
+        else:
+            pass
+
 
 
         #   MQTT Stuff below
