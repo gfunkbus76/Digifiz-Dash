@@ -23,7 +23,7 @@ import pygame
 from datetime import datetime
 import paho.mqtt.client as mqttClient
 from battery.VBatGauge import VbatGauge
-from aux_gauge.AuxGauge import AuxGauge
+#from aux_gauge.AuxGauge import AuxGauge
 from rpm.RpmGauge import RpmGauge
 from constants import *
 from gauges import Gauge
@@ -58,23 +58,30 @@ clock = pygame.time.Clock()
 
 '''                        Game Variables                        '''
 
-boost = AuxGauge(BOOST_XY, 19)
+# for AuxGauge
+'''boost = AuxGauge(BOOST_XY, 19)
 egt = AuxGauge(EGT_XY, 19)
 coolant = AuxGauge(COOLANT_XY, 19)
-oilpressure = AuxGauge(OILPRESSURE_XY, 19)
+oilpressure = AuxGauge(OILPRESSURE_XY, 19)'''
+
+
 
 #   Gauge State Variables --> fed from local MQTT Server
 rpm_status = 0
 coolant_status = 0
-#egt_status = 0
-egt_status = egt.get_frame()
+egt_status = 0
+#egt_status = egt.get_frame()
 oilpressure_status = 0
 boost_status = 0
 fuel_status = 0
 outside_temp_status = 0
 speed_status = 0
 
-
+# for gauges.py
+boost = Gauge(boost_status, BOOST_XY, 19)
+egt = Gauge(egt_status, EGT_XY, 19)
+coolant = Gauge(coolant_status, COOLANT_XY, 19)
+oilpressure = Gauge(oilpressure_status, OILPRESSURE_XY, 19)
 
 '''GPIO State Variables'''
 #
