@@ -7,15 +7,13 @@ global testingStatus
 testingStatus = False
 
 class AuxGauge:
-	def __init__(self, image_location, pos_xy, gauge_range):
-		self.image_location = image_location
-		self.pos_xy = pos_xy
-		self.gauge_range = gauge_range
+	def __init__(self, posxy, qty):
+		self.posxy = posxy
+		self.qty = qty
 		self.image = 0
 		self.frame = 0
 		self.set_image(self.frame)
 		self.grw_flag = True
-
 
 	def get_image(self):
 		return self.image

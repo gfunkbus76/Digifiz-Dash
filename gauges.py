@@ -7,10 +7,10 @@ class Gauge:
 
     #status = 0
 
-    def __init__(self, gauge_status, gauge_pos_xy, gauge_range):
-        self.gauge_status = gauge_status
-        self.gauge_pos_xy = gauge_pos_xy
-        self.gauge_range = gauge_range
+    def __init__(self, status, posxy, range):
+        self.status = status
+        self.posxy = posxy
+        self.range = range
         self.image = 0
         self.frame = 0
 
@@ -18,11 +18,11 @@ class Gauge:
         return self.image
 
     def get_pos(self):
-        return (self.gauge_pos_xy)
+        return (self.posxy)
 
     def set_image(self):
         aux_images = []
-        for i in range(self.gauge_range):
+        for i in range([range]):
             self.image = pygame.image.load("images/gauges/aux" + str(i) + ".png")
             aux_images.append(self.image)
 
