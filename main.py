@@ -1,6 +1,6 @@
 """
     Digifiz     v.03
-    Feb 23, 2021
+    March 4th, 2021
 
     Attempting to code the Digifiz dash project cleaner
     Written by GFunkBus76 in 2021
@@ -22,9 +22,8 @@
 import pygame
 from datetime import datetime
 import paho.mqtt.client as mqttClient
-from battery.VBatGauge import VbatGauge
+from rpm.rpm import RpmGauge
 from aux_gauge.AuxGauge import AuxGauge
-from rpm.RpmGauge import RpmGauge
 from constants import *
 from gauges import Gauge
 
@@ -62,12 +61,12 @@ boost = AuxGauge(BOOST_XY, 19)
 egt = AuxGauge(EGT_XY, 19)
 coolant = AuxGauge(COOLANT_XY, 19)
 oilpressure = AuxGauge(OILPRESSURE_XY, 19)
+rpm = RpmGauge(RPM_XY, 50)
 
 #   Gauge State Variables --> fed from local MQTT Server
 rpm_status = 0
 coolant_status = 0
-#egt_status = 0
-egt_status = egt.get_frame()
+egt_status = 0
 oilpressure_status = 0
 boost_status = 0
 fuel_status = 0
@@ -102,18 +101,6 @@ fuelresOn = pygame.image.load("images/indicators/fuelResOn.png").convert_alpha()
 fuelresOff = pygame.image.load("images/indicators/fuelResOff.png").convert_alpha()
 
 
-#   Creating a list of the image files, 0-50
-rpm_images = []
-for i in range(51):
-    image = pygame.image.load("images/rpm/RPM " + str(i) + "00.png")
-    rpm_images.append(image)
-'''
-#   Creating a list of the aux gauge images (1-20)
-aux_images = []
-for i in range(20):
-    image = pygame.image.load("images/gauges/aux" + str(i) + ".png")
-    aux_images.append(image)
-'''
 #   Creating the list for the indicator gauges
 indicator_images = []
 for i in range(10):
@@ -147,44 +134,28 @@ def on_message(client, userdata, message):
 ######
 
 def on_message_rpm(digi, obj, message):
-    # print(str(message.payload.decode())[0:6])
-    global rpm_status
-    global rpm_mqtt
-    rpm_mqtt = int((message.payload.decode())[0:6])
-    rpm_status = rpm_mqtt
+    rpm_mqtt = int((message.payload.decode()))
+    rpm.set_frame(rpm_mqtt)
 
 
 def on_message_coolant(digi, obj, message):
-    # egt_status = (str(message.payload.decode())[0:5])
-    global coolant_status
-    global coolant_mqtt
-    coolant_mqtt = int((message.payload.decode())[0:6])
-    coolant_status = coolant_mqtt
+    coolant_mqtt = int((message.payload.decode()))
+    coolant.set_frame(coolant_mqtt)
 
 
 def on_message_egt(digi, obj, message):
-    # egt_status = (str(message.payload.decode())[0:5])
-    global egt_status
-    global egt_mqtt
-    egt_mqtt = int((message.payload.decode())[0:6])
-    egt_status = egt_mqtt
-    #egt_status = gauge1.status
+    egt_mqtt = int((message.payload.decode()))
+    egt.set_frame(egt_mqtt)
 
 
 def on_message_oilpressure(digi, obj, message):
-    # egt_status = (str(message.payload.decode())[0:5])
-    global oilpressure_status
-    global oilpressure_mqtt
-    oilpressure_mqtt = int((message.payload.decode())[0:6])
-    oilpressure_status = oilpressure_mqtt
+    oilpressure_mqtt = int((message.payload.decode()))
+    oilpressure.set_frame(oilpressure_mqtt)
 
 
 def on_message_boost(digi, obj, message):
-    # print(str(message.payload.decode())[0:6])
-    global boost_status
-    global boost_mqtt
-    boost_mqtt = int((message.payload.decode())[0:6])
-    boost_status = boost_mqtt
+    boost_mqtt = int((message.payload.decode()))
+    boost.set_frame(boost_mqtt)
 
 
 ######
@@ -194,28 +165,28 @@ def on_message_boost(digi, obj, message):
 def on_message_speed_cv(digi, obj, message):
     global speed_status
     global speed_cv_mqtt
-    speed_cv_mqtt = int((message.payload.decode())[0:6])
+    speed_cv_mqtt = int((message.payload.decode()))
     speed_status = speed_cv_mqtt
 
 
 def on_message_speed_gps(digi, obj, message):
     global speed_gps_status
     global speed_gps_mqtt
-    speed_gps_mqtt = int((message.payload.decode())[0:6])
+    speed_gps_mqtt = int((message.payload.decode()))
     speed_gps_status = speed_gps_mqtt
 
 
 def on_message_outside_temp(digi, obj, message):
     global outside_temp_status
     global outside_temp_mqtt
-    outside_temp_mqtt = int((message.payload.decode())[0:6])
+    outside_temp_mqtt = int((message.payload.decode()))
     outside_temp_status = outside_temp_mqtt
 
 
 def on_message_fuel(digi, obj, message):
     global fuel_status
     global fuel_mqtt
-    fuel_mqtt = int((message.payload.decode())[0:6])
+    fuel_mqtt = int((message.payload.decode()))
     fuel_status = fuel_mqtt
 
 
@@ -226,70 +197,70 @@ def on_message_fuel(digi, obj, message):
 def on_message_illumination(digi, obj, message):
     global illumination_state
     global illumination_mqtt
-    illumination_mqtt = int((message.payload.decode())[0:6])
+    illumination_mqtt = int((message.payload.decode()))
     illumination_state = illumination_mqtt
 
 
 def on_message_foglight(digi, obj, message):
     global foglight_state
     global foglight_mqtt
-    foglight_mqtt = int((message.payload.decode())[0:6])
+    foglight_mqtt = int((message.payload.decode()))
     foglight_state = foglight_mqtt
 
 
 def on_message_defog(digi, obj, message):
     global defog_state
     global defog_mqtt
-    defog_mqtt = int((message.payload.decode())[0:6])
+    defog_mqtt = int((message.payload.decode()))
     defog_state = defog_mqtt
 
 
 def on_message_highbeam(digi, obj, message):
     global highbeam_state
     global highbeam_mqtt
-    highbeam_mqtt = int((message.payload.decode())[0:6])
+    highbeam_mqtt = int((message.payload.decode()))
     highbeam_state = highbeam_mqtt
 
 
 def on_message_leftturn(digi, obj, message):
     global leftturn_state
     global leftturn_mqtt
-    leftturn_mqtt = int((message.payload.decode())[0:6])
+    leftturn_mqtt = int((message.payload.decode()))
     leftturn_state = leftturn_mqtt
 
 
 def on_message_rightturn(digi, obj, message):
     global rightturn_state
     global rightturn_mqtt
-    rightturn_mqtt = int((message.payload.decode())[0:6])
+    rightturn_mqtt = int((message.payload.decode()))
     rightturn_state = rightturn_mqtt
 
 
 def on_message_brakewarn(digi, obj, message):
     global brakewarn_state
     global brakewarn_mqtt
-    brakewarn_mqtt = int((message.payload.decode())[0:6])
+    brakewarn_mqtt = int((message.payload.decode()))
     brakewarn_state = brakewarn_mqtt
 
 
 def on_message_oillight(digi, obj, message):
     global oillight_state
     global oillight_mqtt
-    oillight_mqtt = int((message.payload.decode())[0:6])
+    oillight_mqtt = int((message.payload.decode()))
     oillight_state = oillight_mqtt
 
 
 def on_message_alt(digi, obj, message):
     global alt_state
     global alt_mqtt
-    alt_mqtt = int((message.payload.decode())[0:6])
+    alt_mqtt = int((message.payload.decode()))
     alt_state = alt_mqtt
 
 
 def on_message_glow(digi, obj, message):
     global glow_state
     global glow_mqtt
-    glow_mqtt = int((message.payload.decode())[0:6])
+    glow_mqtt = int((message.payload.decode()))
     glow_state = glow_mqtt
 
 
@@ -404,13 +375,12 @@ def draw_indicators():
 
 def draw_digifiz():
     WIN.blit(BACKGROUND, (0, 0))
-#    egt_status = egt.get_frame()
-
-    print("EGT Status:" + str(egt_status))
-    print("egt get frame:" + str(egt.get_frame()))
-    #   The below code pulls the list and displays the appropriate image based upon the 'status' of the gauge
-    WIN.blit(rpm_images[rpm_status], RPM_XY)
-
+    rpm.show(WIN)
+    coolant.show(WIN)
+    boost.show(WIN)
+    oilpressure.show(WIN)
+    egt.show(WIN)
+    #WIN.blit(rpm_images[rpm_status], RPM_XY)
 #    WIN.blit(aux_images[coolant_status], COOLANT_XY)
 #    WIN.blit(aux_images[egt_status], EGT_XY)
 #    WIN.blit(aux_images[oilpressure_status], OILPRESSURE_XY)
@@ -424,19 +394,6 @@ def draw_digifiz():
 #####
 
 def main():
-    global rpm_status
-    global oilpressure_status
-    global egt_status
-
-#    egt_status += egt.get_frame()
-
-    # boost gauge
-
-    #oilpressure_status = oilpressure.status()
-    #rpm = RpmGauge(RPM_XY, 50, rpm_status)
-
-
-
     #   This was pulled off the internet from somewhere, adapted to work with my setup
     broker_address = "localhost"  # Broker address
     port = 1883  # Broker port
@@ -452,43 +409,20 @@ def main():
     while run:
         clock.tick(FPS)
  #       global rpm_status   # for testing status below
-        global gauge_change # for testing status below
+#        global gauge_change # for testing status below
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
         # Key up to change RPM based upon 'TestingStatus' state at top
         if testingStatus == True:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    if rpm_status <= 50:
-                        gauge_change = +1
-                    if rpm_status == 50:
-                        gauge_change = 0
-                if event.key == pygame.K_DOWN:
-                    if rpm_status <= 50:
-                        gauge_change = -1
-                    if rpm_status == 0:
-                        gauge_change = 0
-
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_UP:
-                    gauge_change = 0
-                if event.key == pygame.K_DOWN:
-                    gauge_change = 0
-
-#        rpm_status += gauge_change # for the testing status sweep above
-        #egt_status = egt.get_frame()
-        draw_digifiz()
-        mileage()
-        draw_indicators()
-        draw_clock_temp()
-        draw_fuel_text()
-        draw_speedometer_text()
-        #rpm.show(WIN)
-        coolant.show(WIN)
-        #gauge1.show(WIN)
-        boost.show(WIN)
-        oilpressure.show(WIN)
+            if rpm_status == 50:
+                gauge_change = False
+            if rpm_status == 0:
+                gauge_change = True
+            if gauge_change:
+                rpm_status + 1
+            else:
+                rpm_status - 1
 
 
         #   MQTT Stuff below
@@ -511,10 +445,13 @@ def main():
         client.message_callback_add('indicator/oillight/state', on_message_oillight)
         client.message_callback_add('indicator/alt/state', on_message_alt)
         client.message_callback_add('indicator/glow/state', on_message_glow)
-        egt.show(WIN)
-        #egt_status = egt.get_frame()
-        #egt.set_frame(egt.get_frame() = int(egt_status))
 
+        draw_digifiz()
+        mileage()
+        draw_indicators()
+        draw_clock_temp()
+        draw_fuel_text()
+        draw_speedometer_text()
         pygame.display.update()
     pygame.quit()
 

@@ -1,12 +1,15 @@
+#	This is for all 'aux' gauges (BOOST / COOLANT / EGT / OIL PRESSURE for now)
+
 import pygame
+from constants import *
 import os 
 from pygame.locals import *
-# THIS IS FOR A BOOST GAUGE
 
 global testingStatus
-testingStatus = False
+
 
 class AuxGauge:
+	'''The AuxGauge is a class to hold and print off the aux gauge images and such'''
 	def __init__(self, posxy, qty):
 		self.posxy = posxy
 		self.qty = qty
@@ -19,17 +22,9 @@ class AuxGauge:
 		return self.image
 
 	def set_image(self, frame):
+		'''Function to apply the int to the image, so setting the display to match the values'''
 		image = str(frame)+".png"
 		self.image = pygame.image.load('images/gauges/aux' + image)
-
-
-		'''aux_images = []
-		for i in range(20):
-			image = str(frame) + ".png"
-			self.image = pygame.image.load("images/gauges/aux" + image)
-			aux_images.append(image)
-#		image = str(frame)+".png"
-#		self.image = pygame.image.load('images/gauges/aux' + image)'''
 
 	def get_pos(self):
 		return (self.posxy)
@@ -44,7 +39,7 @@ class AuxGauge:
 	def show(self, screen):
 		screen.blit(self.get_image(), self.get_pos())
 		if testingStatus == True:
-			if self.get_frame() == 19:
+			if self.get_frame() == self.qty:
 				self.grw_flag = False
 			if self.get_frame() == 0:
 				self.grw_flag = True

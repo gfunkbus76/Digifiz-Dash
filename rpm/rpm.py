@@ -1,42 +1,34 @@
 import pygame
 from constants import *
-from pygame.locals import *
-# THIS IS FOR A BOOST GAUGE
 
-global rpm_status
-rpm_status = 0
+global testingStatus
+#testingStatus = True
 
 class RpmGauge:
-	def __init__(self, posxy, qty, status):
+	def __init__(self, posxy, qty):
 		self.posxy = posxy
 		self.qty = qty
-		self.status = status
 		self.image = 0
-		self.status = 0
-		self.set_image(self.status)
+		self.frame = 0
+		self.set_image(self.frame)
 		self.grw_flag = True
 
 	def get_image(self):
 		return self.image
 
-	def set_image(self, status):
-		rpm_images = []
-		for i in range(51):
-			image = str(rpm_status) + "00.png"
-			self.image = pygame.image.load("images/rpm/RPM " + image)
-			rpm_images.append(image)
-#		image = str(frame)+".png"
-#		self.image = pygame.image.load('images/gauges/aux' + image)
+	def set_image(self, frame):
+		image = str(frame)+"00.png"
+		self.image = pygame.image.load('images/rpm/RPM ' + image)
 
 	def get_pos(self):
 		return (self.posxy)
 
-	def set_frame(self, status):
-		self.status = status
-		self.set_image(status)
+	def set_frame(self, frame):
+		self.frame = frame
+		self.set_image(frame)
 
 	def get_frame(self):
-		return self.status
+		return self.frame
 
 	def show(self, screen):
 		screen.blit(self.get_image(), self.get_pos())

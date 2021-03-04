@@ -1,27 +1,6 @@
 import paho.mqtt.client as mqttClient
-
-######
-#       MQTT Connection Function
-######
-
-
-def on_connect(client, userdata, flags, rc):
-    if rc == 0:
-
-        print("Connected to broker")
-
-        global Connected  # Use global variable
-        Connected = True  # Signal connection
-
-    else:
-
-        print("Connection failed")
-
-
-def on_message(client, userdata, message):
-    print(message.topic + " " + message.payload.decode())
-
-
+from aux_gauge.AuxGauge import AuxGauge
+from constants import *
 
 ######
 #       MQTT Connection Function
@@ -50,7 +29,6 @@ def on_message(client, userdata, message):
 ######
 
 def on_message_rpm(digi, obj, message):
-    # print(str(message.payload.decode())[0:6])
     global rpm_status
     global rpm_mqtt
     rpm_mqtt = int((message.payload.decode())[0:6])
@@ -58,7 +36,6 @@ def on_message_rpm(digi, obj, message):
 
 
 def on_message_coolant(digi, obj, message):
-    # egt_status = (str(message.payload.decode())[0:5])
     global coolant_status
     global coolant_mqtt
     coolant_mqtt = int((message.payload.decode())[0:6])
@@ -66,15 +43,22 @@ def on_message_coolant(digi, obj, message):
 
 
 def on_message_egt(digi, obj, message):
-    # egt_status = (str(message.payload.decode())[0:5])
+    global egt
     global egt_status
     global egt_mqtt
+    global egt_update
+    egt.set_frame = 0
     egt_mqtt = int((message.payload.decode())[0:6])
-    egt_status = egt_mqtt
-
+    #egt_status = egt_mqtt
+    #egt_update += int(egt_mqtt)
+    #egt_status = egt_update
+    egt.set_frame(egt_mqtt)
+    #egt_status = gauge1.status
+'''    print(egt_mqtt)
+    print("MQTT update: "+ str(egt_update))
+    print("MQTT  status: "+ str(egt_status))'''
 
 def on_message_oilpressure(digi, obj, message):
-    # egt_status = (str(message.payload.decode())[0:5])
     global oilpressure_status
     global oilpressure_mqtt
     oilpressure_mqtt = int((message.payload.decode())[0:6])
@@ -82,7 +66,6 @@ def on_message_oilpressure(digi, obj, message):
 
 
 def on_message_boost(digi, obj, message):
-    # print(str(message.payload.decode())[0:6])
     global boost_status
     global boost_mqtt
     boost_mqtt = int((message.payload.decode())[0:6])
@@ -193,15 +176,3 @@ def on_message_glow(digi, obj, message):
     global glow_mqtt
     glow_mqtt = int((message.payload.decode())[0:6])
     glow_state = glow_mqtt
-
-#   This was pulled off the internet from somewhere, adapted to work with my setup
-broker_address = "localhost"  # Broker address
-port = 1883  # Broker port
-
-client = mqttClient.Client("pytest")  # create new instance
-client.on_connect = on_connect  # attach function to callback
-client.on_message = on_message  # attach function to callback
-
-client.connect(broker_address, port=port)  # connect to broker
-
-client.loop_start()  # start the loop

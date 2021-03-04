@@ -1,5 +1,7 @@
 # Constants for the Digifiz Dash
 
+testingStatus = True
+
 #   Screen Size
 WIDTH, HEIGHT = 1920, 720  # use your screens display information
 FPS = 60
