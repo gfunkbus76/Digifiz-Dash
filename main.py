@@ -1,6 +1,6 @@
 """
     Digifiz     v.03
-    Feb 23, 2021
+    March 4th, 2021
 
     Attempting to code the Digifiz dash project cleaner
     Written by GFunkBus76 in 2021
@@ -22,6 +22,10 @@
 import pygame
 from datetime import datetime
 import paho.mqtt.client as mqttClient
+from rpm.rpm import RpmGauge
+from aux_gauge.AuxGauge import AuxGauge
+from constants import *
+from gauges import Gauge
 
 #   Import pygame, for main graphics functions
 #   Date time is for the clock and perhaps MQTT
@@ -34,47 +38,30 @@ testingStatus = True
 
 # Setup Display
 pygame.init()
-WIDTH, HEIGHT = 1920, 720 # use your screens display information
 WIN = pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF)
 
-# Colours
-NEON_YELLOW = (236, 253, 147)   #   Speedo Colour
-NEON_GREEN = (145, 213, 89)     #   Lower gauge colours, clock, odo etc
-DARK_GREY = (9, 52, 50)         #   background of the digits (for the 7segment appearance)
-
 # Title and Icon
-programIcon = pygame.image.load('images/speedometer.png')
+programIcon = pygame.image.load(ICON)
 pygame.display.set_icon(programIcon)
+
 digifiz_ver = ".03 - Feb 23rd"
 pygame.display.set_caption("Digifiz Dashboard v" + digifiz_ver)
 
 # Font Information
-FONT_PATH = "fonts/DSEG7Classic-Bold.ttf"
-FONT_LARGE = 174    #   Speedo size
-FONT_MEDIUM = 94    #   Clock, MFA, Fuel size
-FONT_SMALL = 67     #   Odo Size
 odo_font = pygame.font.Font(FONT_PATH, FONT_SMALL)
 digital_font = pygame.font.Font(FONT_PATH, FONT_MEDIUM)
 font_speedunits = pygame.font.Font(FONT_PATH, FONT_LARGE)
 
 # Setup Game Loop
-FPS = 60
 clock = pygame.time.Clock()
 
 '''                        Game Variables                        '''
-#   Locations for gauge graphics, each has the same start XY but builds upon it, check images folder
-RPM_XY = (135, 5)
-COOLANT_XY = (1481, 105)
-EGT_XY = (1599, 105)
-OILPRESSURE_XY = (1711, 105)
-BOOST_XY = (1822, 105)
-CLOCK_XY = (555, 620)
-FUEL_XY = (1560, 620)
-ODO_XY = (60, 644)
-ODO_L_XY = (395, 678)
-MFA_XY = (1435, 668)
-MFABG_XY = (1021, 563)
-SPEEDO_XY = (1247, 305)
+
+boost = AuxGauge(BOOST_XY, 19)
+egt = AuxGauge(EGT_XY, 19)
+coolant = AuxGauge(COOLANT_XY, 19)
+oilpressure = AuxGauge(OILPRESSURE_XY, 19)
+rpm = RpmGauge(RPM_XY, 50)
 
 #   Gauge State Variables --> fed from local MQTT Server
 rpm_status = 0
@@ -85,6 +72,8 @@ boost_status = 0
 fuel_status = 0
 outside_temp_status = 0
 speed_status = 0
+
+
 
 '''GPIO State Variables'''
 #
@@ -106,22 +95,11 @@ gauge_change = 0
 
 '''                         LOAD IMAGES                         '''
 
-BACKGROUND = pygame.image.load("images/background.png").convert_alpha()
+BACKGROUND = pygame.image.load(BG).convert_alpha()
 MFA = pygame.image.load("images/indicators/MFA_temp.png").convert_alpha()
 fuelresOn = pygame.image.load("images/indicators/fuelResOn.png").convert_alpha()
 fuelresOff = pygame.image.load("images/indicators/fuelResOff.png").convert_alpha()
 
-#   Creating a list of the image files, 0-50
-rpm_images = []
-for i in range(51):
-    image = pygame.image.load("images/rpm/RPM " + str(i) + "00.png")
-    rpm_images.append(image)
-
-#   Creating a list of the aux gauge images (1-20)
-aux_images = []
-for i in range(20):
-    image = pygame.image.load("images/gauges/aux" + str(i) + ".png")
-    aux_images.append(image)
 
 #   Creating the list for the indicator gauges
 indicator_images = []
@@ -132,6 +110,7 @@ for i in range(10):
 ######
 #       MQTT Connection Function
 ######
+
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
@@ -154,163 +133,134 @@ def on_message(client, userdata, message):
 #       ENGINE TOPIC MQTT
 ######
 
-def on_message_rpm(mosq, obj, message):
-    # print(str(message.payload.decode())[0:6])
-    global rpm_status
-    global rpm_mqtt
-    rpm_mqtt = int((message.payload.decode())[0:6])
-    rpm_status = rpm_mqtt
+def on_message_rpm(digi, obj, message):
+    rpm_mqtt = int((message.payload.decode()))
+    rpm.set_frame(rpm_mqtt)
 
 
-def on_message_coolant(mosq, obj, message):
-    # egt_status = (str(message.payload.decode())[0:5])
-    global coolant_status
-    global coolant_mqtt
-    coolant_mqtt = int((message.payload.decode())[0:6])
-    coolant_status = coolant_mqtt
+def on_message_coolant(digi, obj, message):
+    coolant_mqtt = int((message.payload.decode()))
+    coolant.set_frame(coolant_mqtt)
 
 
-def on_message_egt(mosq, obj, message):
-    # egt_status = (str(message.payload.decode())[0:5])
-    global egt_status
-    global egt_mqtt
-    egt_mqtt = int((message.payload.decode())[0:6])
-    egt_status = egt_mqtt
+def on_message_egt(digi, obj, message):
+    egt_mqtt = int((message.payload.decode()))
+    egt.set_frame(egt_mqtt)
 
 
-def on_message_oilpressure(mosq, obj, message):
-    # egt_status = (str(message.payload.decode())[0:5])
-    global oilpressure_status
-    global oilpressure_mqtt
-    oilpressure_mqtt = int((message.payload.decode())[0:6])
-    oilpressure_status = oilpressure_mqtt
+def on_message_oilpressure(digi, obj, message):
+    oilpressure_mqtt = int((message.payload.decode()))
+    oilpressure.set_frame(oilpressure_mqtt)
 
 
-def on_message_boost(mosq, obj, message):
-    # print(str(message.payload.decode())[0:6])
-    global boost_status
-    global boost_mqtt
-    boost_mqtt = int((message.payload.decode())[0:6])
-    boost_status = boost_mqtt
+def on_message_boost(digi, obj, message):
+    boost_mqtt = int((message.payload.decode()))
+    boost.set_frame(boost_mqtt)
 
 
 ######
 #       CABIN TOPIC MQTT
 ######
 
-def on_message_speed_cv(mosq, obj, message):
+def on_message_speed_cv(digi, obj, message):
     global speed_status
     global speed_cv_mqtt
-    speed_cv_mqtt = int((message.payload.decode())[0:6])
+    speed_cv_mqtt = int((message.payload.decode()))
     speed_status = speed_cv_mqtt
 
 
-def on_message_speed_gps(mosq, obj, message):
+def on_message_speed_gps(digi, obj, message):
     global speed_gps_status
     global speed_gps_mqtt
-    speed_gps_mqtt = int((message.payload.decode())[0:6])
+    speed_gps_mqtt = int((message.payload.decode()))
     speed_gps_status = speed_gps_mqtt
 
 
-def on_message_outside_temp(mosq, obj, message):
+def on_message_outside_temp(digi, obj, message):
     global outside_temp_status
     global outside_temp_mqtt
-    outside_temp_mqtt = int((message.payload.decode())[0:6])
+    outside_temp_mqtt = int((message.payload.decode()))
     outside_temp_status = outside_temp_mqtt
 
 
-def on_message_fuel(mosq, obj, message):
+def on_message_fuel(digi, obj, message):
     global fuel_status
     global fuel_mqtt
-    fuel_mqtt = int((message.payload.decode())[0:6])
+    fuel_mqtt = int((message.payload.decode()))
     fuel_status = fuel_mqtt
-
-
-def on_message_speed_cv(mosq, obj, message):
-    global speed_status
-    global speed_cv_mqtt
-    speed_cv_mqtt = int((message.payload.decode())[0:6])
-    speed_status = speed_cv_mqtt
-
-
-def on_message_speed_gps(mosq, obj, message):
-    global speed_gps_status
-    global speed_gps_mqtt
-    speed_gps_mqtt = int((message.payload.decode())[0:6])
-    speed_gps_status = speed_gps_mqtt
 
 
 ######
 #       INDICATOR TOPIC MQTT
 ######
 
-def on_message_illumination(mosq, obj, message):
+def on_message_illumination(digi, obj, message):
     global illumination_state
     global illumination_mqtt
-    illumination_mqtt = int((message.payload.decode())[0:6])
+    illumination_mqtt = int((message.payload.decode()))
     illumination_state = illumination_mqtt
 
 
-def on_message_foglight(mosq, obj, message):
+def on_message_foglight(digi, obj, message):
     global foglight_state
     global foglight_mqtt
-    foglight_mqtt = int((message.payload.decode())[0:6])
+    foglight_mqtt = int((message.payload.decode()))
     foglight_state = foglight_mqtt
 
 
-def on_message_defog(mosq, obj, message):
+def on_message_defog(digi, obj, message):
     global defog_state
     global defog_mqtt
-    defog_mqtt = int((message.payload.decode())[0:6])
+    defog_mqtt = int((message.payload.decode()))
     defog_state = defog_mqtt
 
 
-def on_message_highbeam(mosq, obj, message):
+def on_message_highbeam(digi, obj, message):
     global highbeam_state
     global highbeam_mqtt
-    highbeam_mqtt = int((message.payload.decode())[0:6])
+    highbeam_mqtt = int((message.payload.decode()))
     highbeam_state = highbeam_mqtt
 
 
-def on_message_leftturn(mosq, obj, message):
+def on_message_leftturn(digi, obj, message):
     global leftturn_state
     global leftturn_mqtt
-    leftturn_mqtt = int((message.payload.decode())[0:6])
+    leftturn_mqtt = int((message.payload.decode()))
     leftturn_state = leftturn_mqtt
 
 
-def on_message_rightturn(mosq, obj, message):
+def on_message_rightturn(digi, obj, message):
     global rightturn_state
     global rightturn_mqtt
-    rightturn_mqtt = int((message.payload.decode())[0:6])
+    rightturn_mqtt = int((message.payload.decode()))
     rightturn_state = rightturn_mqtt
 
 
-def on_message_brakewarn(mosq, obj, message):
+def on_message_brakewarn(digi, obj, message):
     global brakewarn_state
     global brakewarn_mqtt
-    brakewarn_mqtt = int((message.payload.decode())[0:6])
+    brakewarn_mqtt = int((message.payload.decode()))
     brakewarn_state = brakewarn_mqtt
 
 
-def on_message_oillight(mosq, obj, message):
+def on_message_oillight(digi, obj, message):
     global oillight_state
     global oillight_mqtt
-    oillight_mqtt = int((message.payload.decode())[0:6])
+    oillight_mqtt = int((message.payload.decode()))
     oillight_state = oillight_mqtt
 
 
-def on_message_alt(mosq, obj, message):
+def on_message_alt(digi, obj, message):
     global alt_state
     global alt_mqtt
-    alt_mqtt = int((message.payload.decode())[0:6])
+    alt_mqtt = int((message.payload.decode()))
     alt_state = alt_mqtt
 
 
-def on_message_glow(mosq, obj, message):
+def on_message_glow(digi, obj, message):
     global glow_state
     global glow_mqtt
-    glow_mqtt = int((message.payload.decode())[0:6])
+    glow_mqtt = int((message.payload.decode()))
     glow_state = glow_mqtt
 
 
@@ -371,7 +321,7 @@ def draw_speedometer_text():
     ''' Speedometer Font Testing '''
     global speed_status
     global font_speedunits
-    speedtext = font_speedunits.render(str(speed_status), 1, NEON_YELLOW)
+    speedtext = font_speedunits.render(str(speed_status), True, NEON_YELLOW)
     text_rect = speedtext.get_rect()
     text_rect.midright = SPEEDO_XY
     WIN.blit(speedtext, text_rect)
@@ -382,16 +332,16 @@ def draw_clock_temp():
     now = datetime.now()
     WIN.blit(MFA, MFABG_XY)
     #   Draw MFA display
-    text = digital_font.render(str(outside_temp_status), 1, NEON_GREEN)
+    text = digital_font.render(str(outside_temp_status), True, NEON_GREEN)
     #   Enables the text to be right center aligned
     text_rect = text.get_rect()
     text_rect.midright = MFA_XY
     WIN.blit(text, text_rect)
 
-    bgclock_text = digital_font.render("00:00", 1, DARK_GREY)
+    bgclock_text = digital_font.render("00:00", True, DARK_GREY)
     WIN.blit(bgclock_text, CLOCK_XY)
     digital_text = now.strftime('%H:%M')
-    text = digital_font.render(digital_text, 1, NEON_GREEN)
+    text = digital_font.render(digital_text, True, NEON_GREEN)
     WIN.blit(text, CLOCK_XY)
 
 
@@ -425,12 +375,19 @@ def draw_indicators():
 
 def draw_digifiz():
     WIN.blit(BACKGROUND, (0, 0))
-    #   The below code pulls the list and displays the appropriate image based upon the 'status' of the gauge
-    WIN.blit(rpm_images[rpm_status], RPM_XY)
-    WIN.blit(aux_images[coolant_status], COOLANT_XY)
-    WIN.blit(aux_images[egt_status], EGT_XY)
-    WIN.blit(aux_images[oilpressure_status], OILPRESSURE_XY)
-    WIN.blit(aux_images[boost_status], BOOST_XY)
+    rpm.show(WIN)
+    coolant.show(WIN)
+    boost.show(WIN)
+    oilpressure.show(WIN)
+    egt.show(WIN)
+    #WIN.blit(rpm_images[rpm_status], RPM_XY)
+#    WIN.blit(aux_images[coolant_status], COOLANT_XY)
+#    WIN.blit(aux_images[egt_status], EGT_XY)
+#    WIN.blit(aux_images[oilpressure_status], OILPRESSURE_XY)
+#    boost.show(WIN)
+#    WIN.blit(aux_images[boost_status], BOOST_XY)
+
+
 
 #####
 #       Main Function for the Pygame Program
@@ -451,39 +408,23 @@ def main():
     run = True
     while run:
         clock.tick(FPS)
-        global rpm_status   # for testing status below
-        global gauge_change # for testing status below
+ #       global rpm_status   # for testing status below
+#        global gauge_change # for testing status below
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
         # Key up to change RPM based upon 'TestingStatus' state at top
         if testingStatus == True:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    if rpm_status <= 50:
-                        gauge_change = +1
-                    if rpm_status == 50:
-                        gauge_change = 0
-                if event.key == pygame.K_DOWN:
-                    if rpm_status <= 50:
-                        gauge_change = -1
-                    if rpm_status == 0:
-                        gauge_change = 0
+            if rpm_status == 50:
+                gauge_change = False
+            if rpm_status == 0:
+                gauge_change = True
+            if gauge_change:
+                rpm_status + 1
+            else:
+                rpm_status - 1
 
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_UP:
-                    gauge_change = 0
-                if event.key == pygame.K_DOWN:
-                    gauge_change = 0
 
-        rpm_status += gauge_change # for the testing status sweep above
-        draw_digifiz()
-        mileage()
-        draw_indicators()
-        draw_clock_temp()
-        draw_fuel_text()
-        draw_speedometer_text()
-        pygame.display.update()
         #   MQTT Stuff below
         client.subscribe("#") #     Subscribes to all topics
         client.message_callback_add('engine/rpm/state', on_message_rpm)
@@ -505,6 +446,13 @@ def main():
         client.message_callback_add('indicator/alt/state', on_message_alt)
         client.message_callback_add('indicator/glow/state', on_message_glow)
 
+        draw_digifiz()
+        mileage()
+        draw_indicators()
+        draw_clock_temp()
+        draw_fuel_text()
+        draw_speedometer_text()
+        pygame.display.update()
     pygame.quit()
 
 
