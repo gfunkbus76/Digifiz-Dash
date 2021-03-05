@@ -6,7 +6,7 @@ import os
 from pygame.locals import *
 
 global testingStatus
-
+testingStatus = False
 class AuxGauge:
 	'''The AuxGauge is a class to hold and print off the aux gauge images and such'''
 	def __init__(self, posxy, qty):

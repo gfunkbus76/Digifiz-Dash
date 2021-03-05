@@ -55,5 +55,6 @@ class SpeedGauge:
 		screen.blit(self.text, self.get_textpos())
 		self.textx += self.text.get_rect().right
 		self.refresh()
+
 	def refresh(self):
 		self.set_speed(self.get_speed() + 1)

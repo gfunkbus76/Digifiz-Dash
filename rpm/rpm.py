@@ -2,7 +2,7 @@ import pygame
 from constants import *
 
 global testingStatus
-#testingStatus = True
+testingStatus = False
 
 class RpmGauge:
 	def __init__(self, posxy, qty):
