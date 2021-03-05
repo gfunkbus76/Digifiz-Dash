@@ -1,5 +1,4 @@
 import paho.mqtt.client as mqttClient
-from aux_gauge.AuxGauge import AuxGauge
 from constants import *
 
 ######
@@ -9,7 +8,6 @@ from constants import *
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
-
         print("Connected to broker")
 
         global Connected  # Use global variable
