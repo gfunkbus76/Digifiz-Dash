@@ -1,3 +1,4 @@
+import paho.mqtt.client as mqttClient
 
 class PahoImport(object):
 
@@ -170,3 +171,28 @@ class PahoImport(object):
         global glow_mqtt
         glow_mqtt = int((self.message.payload.decode()))
         glow_state = glow_mqtt
+
+    def callbacks(self):
+        #   MQTT Call backs... putting values in from topics
+
+        self.client.subscribe("#") #     Subscribes to all topics
+        client.message_callback_add('engine/rpm/state', on_message_rpm)
+        client.message_callback_add('engine/egt/state', on_message_egt)
+        client.message_callback_add('engine/oilpressure/state', on_message_oilpressure)
+        client.message_callback_add('engine/boost/state', on_message_boost)
+        client.message_callback_add('engine/coolant/state', on_message_coolant)
+        client.message_callback_add('engine/fuel/state', on_message_fuel)
+        client.message_callback_add('cabin/outside_temp/state', on_message_outside_temp)
+        client.message_callback_add('cabin/speed_cv/state', on_message_speed_cv)
+        client.message_callback_add('indicator/illumination/state', on_message_illumination)
+        client.message_callback_add('indicator/foglight/state', on_message_foglight)
+        client.message_callback_add('indicator/defog/state', on_message_defog)
+        client.message_callback_add('indicator/highbeam/state', on_message_highbeam)
+        client.message_callback_add('indicator/leftturn/state', on_message_leftturn)
+        client.message_callback_add('indicator/rightturn/state', on_message_rightturn)
+        client.message_callback_add('indicator/brakewarn/state', on_message_brakewarn)
+        client.message_callback_add('indicator/oillight/state', on_message_oillight)
+        client.message_callback_add('indicator/alt/state', on_message_alt)
+        client.message_callback_add('indicator/glow/state', on_message_glow)
+
+

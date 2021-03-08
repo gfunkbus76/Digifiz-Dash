@@ -60,7 +60,7 @@ void loop()
 
 
       int32_t boost = rxBuf[3];
-      int32_t oilP = rxBuf[6]     
+      int32_t oilP = rxBuf[6];    
       int32_t egtc = rxBuf[2];
       int32_t voltage = rxBuf[5];
       egtc = (egtc << 8) | rxBuf[1];

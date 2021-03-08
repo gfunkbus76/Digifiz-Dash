@@ -1,4 +1,3 @@
-
 // GFunkbus76 - Arduino Engine Bay Monitoring System - Oct 2020
 // Currently managing the following via sensor data
 //  EGT Sensor - https://www.amazon.ca/gp/product/B00OZTNFCW/
@@ -9,6 +8,7 @@
 
 #include <SPI.h>
 #include <max6675.h> // egt
+#include <can.h>
 #include <mcp2515.h> // canbus
 #include <Wire.h> // for pressure transducers (Boost/Oil Pressure)
 
@@ -121,8 +121,11 @@ void loop() {
   mcp2515.sendMessage(&canMsg);     //Sends the CAN message
 */
   Serial.println(egtDataC, 1); //EGTC
+  Serial.print("EGT: ");
   Serial.println(egtDataF); //EGTF
+  Serial.print("BOOST: ");
   Serial.println(boostValue, 1); // Boost one decimal place
+  Serial.print("VOLTAGE: ");
   Serial.println(vin, 2); // Voltage
 
   delay(500);
