@@ -1,3 +1,5 @@
+
+
 '''                        Dash Variables                        '''
 
 #   Gauge State Variables --> fed from local MQTT Server
@@ -10,6 +12,9 @@ fuel_status = 0
 outside_temp_status = 0
 speed_status = 0
 
+#   MQTT Variables
+broker_address = "localhost"  # Broker address
+port = 1883  # Broker port
 
 
 '''GPIO State Variables'''

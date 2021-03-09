@@ -26,6 +26,7 @@ from rpm.rpm import RpmGauge
 from aux_gauge.AuxGauge import AuxGauge
 from constants import *
 from variables import *
+from draw import *
 
 #   Import pygame, for main graphics functions
 #   Date time is for the clock and perhaps MQTT
@@ -260,10 +261,12 @@ def draw_speedometer_text():
     text_rect.midright = SPEEDO_XY
     WIN.blit(speedtext, text_rect)
 
-
-def draw_clock_temp():
+def draw_mfa():
+    '''
+    Drawing the clock and interior temp - should seperate as the MFA will eventually evolve.
+    '''
     global outside_temp_status
-    now = datetime.now()
+
     WIN.blit(MFA, MFABG_XY)
     #   Draw MFA display
     text = digital_font.render(str(outside_temp_status), True, NEON_GREEN)
@@ -272,14 +275,15 @@ def draw_clock_temp():
     text_rect.midright = MFA_XY
     WIN.blit(text, text_rect)
 
-    bgclock_text = digital_font.render("00:00", True, DARK_GREY)
-    WIN.blit(bgclock_text, CLOCK_XY)
-    digital_text = now.strftime('%H:%M')
-    text = digital_font.render(digital_text, True, NEON_GREEN)
-    WIN.blit(text, CLOCK_XY)
+
 
 
 def draw_indicators():
+    '''
+    The area where I blit or draw the indicators/idiot lights and turn signals/low fuel etc.
+
+    '''
+
     if illumination_state == 1:
         WIN.blit(indicator_images[0], (45, 460))
     if foglight_state == 1:
@@ -301,12 +305,13 @@ def draw_indicators():
     if glow_state == 1:
         WIN.blit(indicator_images[9], (1780, 460))
 
+    #   To highlight the fuel reserve indicator (factory is at 7 litres
     if fuel_status <= 7:
         WIN.blit(fuelresOn, (1795, 616))
     else:
         WIN.blit(fuelresOff, (1795, 616))
 
-
+#   Main Drawings for the program - Background + Gauges
 def draw_digifiz():
     WIN.blit(BACKGROUND, (0, 0))
     rpm.show(WIN)
@@ -363,7 +368,8 @@ def main():
         draw_digifiz()
         mileage()
         draw_indicators()
-        draw_clock_temp()
+        draw_clock()
+        draw_mfa()
         draw_fuel_text()
         draw_speedometer_text()
         pygame.display.update()

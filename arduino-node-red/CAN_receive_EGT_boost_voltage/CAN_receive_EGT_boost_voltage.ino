@@ -47,11 +47,11 @@ void loop()
 //    else
       sprintf(msgString, "Standard ID: 0x%.3lX    DLC: %1d  Data:", rxId, len);
 
-    Serial.print(msgString);
+    //Serial.print(msgString);
 
     if ((rxId & 0x40000000) == 0x40000000) {  // Determine if message is a remote request frame.
       sprintf(msgString, " REMOTE REQUEST FRAME");
-      Serial.print(msgString);
+     // Serial.print(msgString);
     } else {
    //        for(byte i = 0; i<len; i++){
      //         sprintf(msgString, " 0x%.2X", rxBuf[i]);
@@ -75,16 +75,15 @@ void loop()
       float volt = vin/100;
 //      char volt[8];
   //    dtostrf(vin, 6, 2, volt);
-      Serial.print("EGT(c): ");
+    //  Serial.print("EGT(c): ");
       Serial.print(egtc);
-            Serial.print(" ");
-      Serial.print(" Boost(bar): ");
+      Serial.print(","); 
+//      Serial.print("Boost(bar): ");
       Serial.print(boostDisplay);
-            Serial.print(" ");
-      Serial.print("Voltage: ");
+      Serial.print(","); 
+//      Serial.print("Voltage: ");
       Serial.print(volt);
-            Serial.print(" ");
-      Serial.println(" "); 
+      Serial.print(""); 
       
     }
  Serial.println();
