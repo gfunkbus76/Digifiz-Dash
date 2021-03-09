@@ -244,7 +244,7 @@ def mileage():
 #####
 
 def draw_fuel_text():
-    global digital_font
+    #global digital_font
     digital_fuel = fuel_status
     fuel_text = digital_font.render(str(int(digital_fuel)), True, NEON_GREEN)
     text_rect = fuel_text.get_rect()
@@ -253,9 +253,11 @@ def draw_fuel_text():
 
 
 def draw_speedometer_text():
-    ''' Speedometer Font Testing '''
-    global speed_status
-    global font_speedunits
+    '''
+    Speedometer text and write
+    '''
+    #global speed_status
+    #global font_speedunits
     speedtext = font_speedunits.render(str(speed_status), True, NEON_YELLOW)
     text_rect = speedtext.get_rect()
     text_rect.midright = SPEEDO_XY
@@ -263,9 +265,9 @@ def draw_speedometer_text():
 
 def draw_mfa():
     '''
-    Drawing the clock and interior temp - should seperate as the MFA will eventually evolve.
+    Drawing the interior temp only currently - the MFA will eventually evolve.
     '''
-    global outside_temp_status
+    #global outside_temp_status
 
     WIN.blit(MFA, MFABG_XY)
     #   Draw MFA display
@@ -281,7 +283,6 @@ def draw_mfa():
 def draw_indicators():
     '''
     The area where I blit or draw the indicators/idiot lights and turn signals/low fuel etc.
-
     '''
 
     if illumination_state == 1:
@@ -319,6 +320,12 @@ def draw_digifiz():
     boost.show(WIN)
     oilpressure.show(WIN)
     egt.show(WIN)
+    mileage()
+    draw_indicators()
+    draw_clock()
+    draw_mfa()
+    draw_fuel_text()
+    draw_speedometer_text()
 
 #####
 #       Main Function for the Pygame Program
@@ -366,12 +373,6 @@ def main():
         client.message_callback_add('indicator/glow/state', on_message_glow)
 
         draw_digifiz()
-        mileage()
-        draw_indicators()
-        draw_clock()
-        draw_mfa()
-        draw_fuel_text()
-        draw_speedometer_text()
         pygame.display.update()
     pygame.quit()
 
