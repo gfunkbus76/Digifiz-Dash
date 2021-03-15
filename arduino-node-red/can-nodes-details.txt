@@ -1,0 +1,26 @@
+Front
+Speed_CV
+Speed_GPS
+
++Odometer
++Headlights On
++Fog Lights On
++Rear Defrost On
++Highbeam
++Left indicator
++Right Indicator
++Brake Warning
++Voltage Warning
++Glow Light
+
+
+Rear:
+			Bytes taken
+CTS (0-255) 		1
+EGT (0-1023) 		2
+Boost (0-255) 		1
+RPM (0-5000)		2
+Oil Pressure (0-255)	1	
+Fuel
+
++Oil Light
