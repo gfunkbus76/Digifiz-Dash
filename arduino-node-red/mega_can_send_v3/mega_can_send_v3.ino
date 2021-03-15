@@ -32,12 +32,12 @@ float boostValue = 0; //variable to store the value coming from the pressure tra
 
 
 // Voltage Sensor Module
-int voltInput = A1;
-float vout = 0.0;
-float vin = 0.0;
-float R1 = 30000.0; //  
-float R2 = 7500.0; // 
-int value = 0;
+//int voltInput = A1;
+//float vout = 0.0;
+//float vin = 0.0;
+//float R1 = 30000.0; //
+//float R2 = 7500.0; //
+//int value = 0;
 
 
 //Setting of the canbus messages we're sending
@@ -64,7 +64,7 @@ void setup()
   mcp2515.setNormalMode();
 
   // Voltage Sensor Details
-  pinMode(voltInput, INPUT);
+  //pinMode(voltInput, INPUT);
 
   Serial.println("CANBUS Engine Control Module Test");
   //   wait for MAX chip to stabilize
@@ -87,7 +87,7 @@ void loop() {
   // Voltage Sensor
   value = analogRead(voltInput);
   vout = (value * 5.0) / 1024.0; // see text
-  vin = vout / (R2/(R1+R2));
+  vi n = vout / (R2/(R1+R2));
   int32_t voltage = vin * 100; // times 100 to increase to 2 decimal places - divided by 100 on receive end
  // int32_t voltage = (vin);
 
