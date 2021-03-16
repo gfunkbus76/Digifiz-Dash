@@ -110,25 +110,23 @@ void loop() {
   canMsg.can_dlc = 8;               //CAN data length as 8
   canMsg.data[0] = egtDataC;             //Update egt value in [0]
   canMsg.data[1] = egtDataC >> 8;        // EGT second value
-  canMsg.data[2] = oilpressureData;     //Oilpressure
-  canMsg.data[3] = boostData;             //Update boost
-  canMsg.data[4] = 0x00;          //Rest all with 0
-  canMsg.data[5] = 0x00;
-  //  canMsg.data[4] = voltage;           //Rest all with 0
-  //  canMsg.data[5] = voltage >> 8;
-  canMsg.data[6] = 0x00;
-  canMsg.data[7] = 0x00;
+  canMsg.data[2] = oilpressureData;     //Oilpressure - psi
+  canMsg.data[3] = boostData;         //  Update boost - psi
+  canMsg.data[4] = 0x00;              //  Coolant - *C
+  canMsg.data[5] = 0x00;              //  RPM 1
+  canMsg.data[6] = 0x00;              //  RPM 2
+  canMsg.data[7] = 0x00;              //  Fuel - 0-255?
   mcp2515.sendMessage(&canMsg);     //Sends the CAN message
 
   canMsg1.can_id  = 0x037;           //CAN id as 0x036
   canMsg1.can_dlc = 8;               //CAN data length as 8
   canMsg1.data[0] = 0x00;             //Update egt value in [0]
-  canMsg1.data[1] = 0x00;            //Rest all with 0
+  canMsg1.data[1] = 0x10;            //Rest all with 0
   canMsg1.data[2] = 0x00;
-  canMsg1.data[3] = 0x00;             //Update egt value in [0]
+  canMsg1.data[3] = 0x10;             //Update egt value in [0]
   canMsg1.data[4] = 0x00;            //Rest all with 0
-  canMsg1.data[5] = 0x00;
-  canMsg1.data[6] = 0x00;
+  canMsg1.data[5] = 0x10;
+  canMsg1.data[6] = 0x10;
   canMsg1.data[7] = 0x00;
   mcp2515.sendMessage(&canMsg1);     //Sends the CAN message
 

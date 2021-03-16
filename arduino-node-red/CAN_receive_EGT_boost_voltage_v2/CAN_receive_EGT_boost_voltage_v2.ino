@@ -42,50 +42,51 @@ void loop()
   {
     CAN0.readMsgBuf(&rxId, &len, rxBuf);      // Read data: len = data length, buf = data byte(s)
 
-      sprintf(msgString, "Standard ID: 0x%.3lX    DLC: %1d  Data:", rxId, len);
+    sprintf(msgString, "Standard ID: 0x%.3lX    DLC: %1d  Data:", rxId, len);
 
     Serial.print(msgString);
 
     if ((rxId & 0x40000000) == 0x40000000) {  // Determine if message is a remote request frame.
       sprintf(msgString, " REMOTE REQUEST FRAME");
-     // Serial.print(msgString);
+      // Serial.print(msgString);
     } else {
-   //        for(byte i = 0; i<len; i++){
-     //         sprintf(msgString, " 0x%.2X", rxBuf[i]);
-       //       Serial.print(msgString);
+      //        for(byte i = 0; i<len; i++){
+      //         sprintf(msgString, " 0x%.2X", rxBuf[i]);
+      //       Serial.print(msgString);
 
 
-      if (canID == 0) {
-      
+      if (rxId & 0x0360 == 0x0360) {
+
         int32_t boost = rxBuf[3];
-        int32_t oilP = rxBuf[6];    
-        int32_t egtc = rxBuf[2];
+        int32_t oilP = rxBuf[2];
+        int32_t egtc = rxBuf[1];
         int32_t voltage = rxBuf[5];
-        egtc = (egtc << 8) | rxBuf[1];
+        //egtc = (egtc << 8) | rxBuf[1];
         egtc = (egtc << 8) | rxBuf[0];
-        boost = rxBuf[3];  
+        boost = rxBuf[3];
         float boostData = boost;
-        float boostDisplay = boostData/10;
-           
-        voltage = (voltage << 8) | rxBuf[4];
+        float boostDisplay = boostData / 10;
+
+        //voltage = (voltage << 8) | rxBuf[4];
         // Convert voltage to float and then divide by sending multiplier (100) to display accurate decimal version
-        float vin = voltage;
-        float volt = vin/100;
-//      char volt[8];
-  //    dtostrf(vin, 6, 2, volt);
-    //  Serial.print("EGT(c): ");
-      Serial.print(egtc);
-      Serial.print(","); 
-//      Serial.print("Boost(bar): ");
-      Serial.print(boostDisplay);
-      Serial.print(","); 
-//      Serial.print("Voltage: ");
-      Serial.print(volt);
-      Serial.print(""); 
-      
+        //float vin = voltage;
+        //float volt = vin / 100;
+        //      char volt[8];
+        //    dtostrf(vin, 6, 2, volt);
+        //  Serial.print("EGT(c): ");
+        Serial.print(egtc);
+        Serial.print(",");
+        //      Serial.print("Boost(bar): ");
+        Serial.print(boostDisplay);
+        Serial.print(",");
+        //      Serial.print("Voltage: ");
+        Serial.print(oilP);
+        Serial.print("");
+
+      }
+      Serial.println();
+
     }
- Serial.println();
- 
   }
 }
 

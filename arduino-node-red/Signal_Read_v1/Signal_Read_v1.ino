@@ -24,10 +24,7 @@ unsigned char egt;
 unsigned char oil_pressure;
 unsigned char fuel;
 unsigned char outside_temp;
-
-
-// Temp holding cell...
-unsigned char temp
+unsigned char temp;
 
 
 void setup()
@@ -58,12 +55,12 @@ void loop()
         CAN.readMsgBuf(&len, buf);    //read data,  len: data length, buf: data buffer
         canID = CAN.getCanId();       //getting the ID of the incoming message
 
-        if (canID == 0x360)            //reading only our beloved 0xF1 message
+        if (canID == 0x036)            //reading only our beloved 0xF1 message
         {
           //for the second signal: engine RPM
-          engine_rpm = buf[1];
+          engine_rpm = buf[5];
           engine_rpm = engine_rpm << 8;
-          temp = buf[2] & 0x3F;
+          temp = buf[6];
           engine_rpm = engine_rpm + temp;
 
           Serial.print("Engine RPM = ");
