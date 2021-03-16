@@ -78,9 +78,8 @@ void setup()
 void loop() {
   // EGT Stuff
   //int egt = thermocouple.readFahrenheit(); //get egt temp
-  int32_t egtDataF = (thermocouple.readFahrenheit());
+//  int32_t egtDataF = (thermocouple.readFahrenheit());
   int32_t egtDataC = (thermocouple.readCelsius());
-  //  int32_t egtDataC = (thermocouple.readCelsius());
 
   // Boost Sensor - pulled from https://www.youtube.com/watch?v=UrqPxwsPWGk&t=679s - Tyler at tylerovens@me.com
   boostValue = analogRead(boostInput); //reads value from input pin and assigns to variable
@@ -105,11 +104,14 @@ void loop() {
   // int egt = thermocouple.readCelsius(); //get egt temp
   // egt=map(egt,0,1023,0,255);
   // newegt = (egt[0] <<8) + egt[1];
+  
+  uint8_t lowbyte = egtDataC & 0xFF;
+  uint8_t highbyte = egtDataC >> 8;
 
   canMsg.can_id  = 0x036;           //CAN id as 0x036
   canMsg.can_dlc = 8;               //CAN data length as 8
-  canMsg.data[0] = egtDataC;             //Update egt value in [0]
-  canMsg.data[1] = egtDataC >> 8;        // EGT second value
+  canMsg.data[0] = highbyte;            //Update egt value in [0]
+  canMsg.data[1] = lowbyte;        // EGT second value
   canMsg.data[2] = oilpressureData;     //Oilpressure - psi
   canMsg.data[3] = boostData;         //  Update boost - psi
   canMsg.data[4] = 0x00;              //  Coolant - *C
@@ -130,9 +132,10 @@ void loop() {
   canMsg1.data[7] = 0x00;
   mcp2515.sendMessage(&canMsg1);     //Sends the CAN message
 
-  Serial.println(egtDataC, 1); //EGTC
   Serial.print("EGT: ");
-  Serial.println(egtDataF); //EGTF
+  Serial.println(egtDataC, 1); //EGTC
+//  Serial.println(lowbyte);
+//  Serial.println(egtDataF); //EGTF
   Serial.print("BOOST: ");
   Serial.println(boostValue, 1); // Boost one decimal place
   Serial.print("OILPRESSURE: ");

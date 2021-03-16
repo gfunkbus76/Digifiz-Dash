@@ -44,7 +44,7 @@ void loop()
 
     sprintf(msgString, "Standard ID: 0x%.3lX    DLC: %1d  Data:", rxId, len);
 
-    Serial.print(msgString);
+    //Serial.print(msgString);
 
     if ((rxId & 0x40000000) == 0x40000000) {  // Determine if message is a remote request frame.
       sprintf(msgString, " REMOTE REQUEST FRAME");
@@ -57,12 +57,15 @@ void loop()
 
       if (rxId & 0x0360 == 0x0360) {
 
-        int32_t boost = rxBuf[3];
+        unsigned int receivedEGTc = 0;
+        receivedEGTc = rxBuf[0] <<8 | rxBuf[1];
+        
         int32_t oilP = rxBuf[2];
-        int32_t egtc = rxBuf[1];
-        int32_t voltage = rxBuf[5];
+        int32_t boost = rxBuf[3];
+        //int32_t voltage = rxBuf[5];
+
         //egtc = (egtc << 8) | rxBuf[1];
-        egtc = (egtc << 8) | rxBuf[0];
+        //egtc = (egtc << 8) | rxBuf[0];
         boost = rxBuf[3];
         float boostData = boost;
         float boostDisplay = boostData / 10;
@@ -74,7 +77,7 @@ void loop()
         //      char volt[8];
         //    dtostrf(vin, 6, 2, volt);
         //  Serial.print("EGT(c): ");
-        Serial.print(egtc);
+        Serial.print(receivedEGTc);
         Serial.print(",");
         //      Serial.print("Boost(bar): ");
         Serial.print(boostDisplay);
