@@ -45,7 +45,7 @@ void setup()
 
   pinMode(CAN0_INT, INPUT);                            // Configuring pin for /INT input
 
-  Serial.println("Receiving CAN BUS Messages ...");
+  //Serial.println("Receiving CAN BUS Messages ...");
 }
 
 void loop()
@@ -63,45 +63,70 @@ void loop()
 
     if ((rxId) == 0x036) {  // Determine if message is a remote request frame.
 
+
       //    EGT Gauge (two bytes, combined)
       egt = rxBuf[0];
       egt = egt << 8;
       temp = rxBuf[1];
       egt = egt + temp;
-      Serial.print("EGT:");
-      Serial.println(egt);
+//      Serial.print("EGT:");
+//      Serial.println(egt);
 
-      
+
+
       //    Oil Pressure Values /100 due to scaling on transmission
       oil_pressure = rxBuf[2];
       oil_pressure = oil_pressure / 100;
-      Serial.print("OILPRESSURE:");
-      Serial.println(oil_pressure);
+//      Serial.print("OILPRESSURE:");
+//      Serial.println(oil_pressure);
 
       //    Boost value / 100 due to scaling
       boost = rxBuf[3];
       boost = boost / 100;
-      Serial.print("BOOST:");
-      Serial.println(boost);
+//      Serial.print("BOOST:");
+//      Serial.println(boost);
 
       //    Coolant Temp Value
       coolant = rxBuf[4];
-      Serial.print("COOLANT:");
-      Serial.println(coolant);
+//      Serial.print("COOLANT:");
+//      Serial.println(coolant);
 
       //    RPM Values
       engine_rpm = rxBuf[5];
       engine_rpm = engine_rpm << 8;
       temp = rxBuf[6];
       engine_rpm = engine_rpm + temp;
-      Serial.print("RPM:");
-      Serial.println(engine_rpm);
+//      Serial.print("RPM:");
+//      Serial.println(engine_rpm);
 
       //    Fuel Sending Levels
       fuel = rxBuf[7];
-      Serial.print("FUEL:");
-      Serial.println(fuel);
-      Serial.println();
+//      Serial.print("FUEL:");
+//      Serial.println(fuel);
+//      Serial.println();
+
+
+      //    Printing the unpacked CAN messages from the sensors as JSON file to be read and interpreted by node-red
+      Serial.print("{");
+      Serial.print("\"EGT\":");
+      Serial.print(egt);
+      Serial.print(",");
+      Serial.print("\"OIL_PRESSURE\":");
+      Serial.print(oil_pressure);
+      Serial.print(",");
+      Serial.print("\"BOOST\":");
+      Serial.print(boost);
+      Serial.print(",");
+      Serial.print("\"COOLANT\":");
+      Serial.print(coolant);
+      Serial.print(",");
+      Serial.print("\"RPM\":");
+      Serial.print(engine_rpm);
+      Serial.print(",");
+      Serial.print("\"FUEL\":");
+      Serial.print(fuel);
+      Serial.println("}");
+
 
     }
   }
