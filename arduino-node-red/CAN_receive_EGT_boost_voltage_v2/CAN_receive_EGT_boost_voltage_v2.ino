@@ -66,6 +66,12 @@ void loop()
 
         //egtc = (egtc << 8) | rxBuf[1];
         //egtc = (egtc << 8) | rxBuf[0];
+
+        oilP = rxBuf[2];
+        float oilPData = oilP;
+        float oilPDisplay = oilPData / 10;
+      
+        
         boost = rxBuf[3];
         float boostData = boost;
         float boostDisplay = boostData / 10;
@@ -83,7 +89,7 @@ void loop()
         Serial.print(boostDisplay);
         Serial.print(",");
         //      Serial.print("Voltage: ");
-        Serial.print(oilP);
+        Serial.print(oilPDisplay);
         Serial.print("");
 
       }

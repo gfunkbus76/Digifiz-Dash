@@ -1,18 +1,22 @@
-// GFunkbus76 - Arduino Engine Bay Monitoring System - Oct 2020
+/*
+// GFunkbus76 - Arduino Engine Bay Monitoring System - March 2021
 // Currently managing the following via sensor data
 //  EGT Sensor - https://www.amazon.ca/gp/product/B00OZTNFCW/
 //  Oil Pressure - 150psi 3-wire Pressure Transducer
 //  Boost Pressure - 100psi 3-wire Pressure Transducer
 //
-
+//  Working on adding: Coolant / RPM / Fuel - as well as some dummy lights
+//
+*/
 
 #include <SPI.h>
-#include <max6675.h> // egt
-#include <can.h>
-#include <mcp2515.h> // canbus
-#include <Wire.h> // for pressure transducers (Boost/Oil Pressure)
+#include <max6675.h>    // For EGT Sensor
+#include <can.h>        // Cory j Fowler Canbus Libray
+#include <mcp2515.h>    // Cory j Fowler Canbus Libray
+#include <Wire.h>       // for pressure transducers (Boost/Oil Pressure)
 
-// EGT Sensor
+// EGT
+//      From an library example
 int thermoDO = 4;
 int thermoCS = 5;
 int thermoCLK = 6;
@@ -20,7 +24,8 @@ MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 int vccPin = 3;
 int gndPin = 2;
 
-// Boost Sensor - pulled from https://www.youtube.com/watch?v=UrqPxwsPWGk&t=679s - Tyler at tylerovens@me.com
+// BOOST
+//      pulled from https://www.youtube.com/watch?v=UrqPxwsPWGk&t=679s - Tyler at tylerovens@me.com
 const int boostInput = A0; //select the analog input pin for the pressure transducer
 const int pressureZero = 102.4; //analog reading of pressure transducer at 0psi
 const int pressureMax = 921.6; //analog reading of pressure transducer at 100psi
@@ -29,25 +34,16 @@ const int boostmaxPSI = 100; //psi value of transducer being used
 const int sensorreadDelay = 250; //constant integer to set the sensor read delay in milliseconds
 float boostValue = 0; //variable to store the value coming from the pressure transducer
 
-// Oil Pressure Sensor - pulled from https://www.youtube.com/watch?v=UrqPxwsPWGk&t=679s - Tyler at tylerovens@me.com
+// OIL PRESSURE
+//      pulled from https://www.youtube.com/watch?v=UrqPxwsPWGk&t=679s - Tyler at tylerovens@me.com
 const int oilpressureInput = A1; //select the analog input pin for the pressure transducer
 const int oilpressuremaxPSI = 150; //psi value of transducer being used
 float oilpressureValue = 0; //variable to store the value coming from the pressure transducer
 
-
-// Voltage Sensor Module
-//int voltInput = A1;
-//float vout = 0.0;
-//float vin = 0.0;
-//float R1 = 30000.0; //
-//float R2 = 7500.0; //
-//int value = 0;
-
-
-//Setting of the canbus messages we're sending
-struct can_frame canMsg; //egt
-struct can_frame canMsg1; //rpm
-struct can_frame canMsg2; //?
+//  SETTING CAN BUS MESSAGE QTY
+//        basic details of the can signals we are sending from the Engine Bay
+struct can_frame canMsg;    //    Sensor Data: EGT,  OIL PRESSURE, BOOST,  COOLANT,  RPM,  FUEL   
+struct can_frame canMsg1;   //    Dummy Lights and more: Oil Light(pin drops low?), ALT Light?, Reverse Indicator
 MCP2515 mcp2515(53); // Pin
 
 
@@ -66,10 +62,7 @@ void setup()
   mcp2515.reset();
   mcp2515.setBitrate(CAN_500KBPS, MCP_8MHZ); //Sets CAN at speed 500KBPS and Clock 8MHz
   mcp2515.setNormalMode();
-
-  // Voltage Sensor Details
-  //pinMode(voltInput, INPUT);
-
+  
   Serial.println("CANBUS Engine Control Module Test");
   //   wait for MAX chip to stabilize
   delay(500);
@@ -77,10 +70,10 @@ void setup()
 
 void loop() {
   // EGT Stuff
-  //int egt = thermocouple.readFahrenheit(); //get egt temp
-//  int32_t egtDataF = (thermocouple.readFahrenheit());
   int32_t egtDataC = (thermocouple.readCelsius());
-
+  uint8_t lowbyte = egtDataC & 0xFF;
+  uint8_t highbyte = egtDataC >> 8;
+  
   // Boost Sensor - pulled from https://www.youtube.com/watch?v=UrqPxwsPWGk&t=679s - Tyler at tylerovens@me.com
   boostValue = analogRead(boostInput); //reads value from input pin and assigns to variable
   boostValue = ((boostValue - pressureZero) * boostmaxPSI) / (pressureMax - pressureZero); //conversion equation to convert analog reading to psi
@@ -92,26 +85,11 @@ void loop() {
   oilpressureValue = ((oilpressureValue - pressureZero) * oilpressuremaxPSI) / (pressureMax - pressureZero); //conversion equation to convert analog reading to psi
   int32_t oilpressureData = oilpressureValue * 100; // times 100 to increase to 2 decimal places - divided by 100 on receive end
 
-
-  // Voltage Sensor
-  // value = analogRead(voltInput);
-  //vout = (value * 5.0) / 1024.0; // see text
-  //vi n = vout / (R2/(R1+R2));
-  //int32_t voltage = vin * 100; // times 100 to increase to 2 decimal places - divided by 100 on receive end
-  // int32_t voltage = (vin);
-
-
-  // int egt = thermocouple.readCelsius(); //get egt temp
-  // egt=map(egt,0,1023,0,255);
-  // newegt = (egt[0] <<8) + egt[1];
-  
-  uint8_t lowbyte = egtDataC & 0xFF;
-  uint8_t highbyte = egtDataC >> 8;
-
+  //    Preparing the CAN BUS Messages
   canMsg.can_id  = 0x036;           //CAN id as 0x036
   canMsg.can_dlc = 8;               //CAN data length as 8
-  canMsg.data[0] = highbyte;            //Update egt value in [0]
-  canMsg.data[1] = lowbyte;        // EGT second value
+  canMsg.data[0] = highbyte;        //Update egt value in [0]
+  canMsg.data[1] = lowbyte;         // EGT second value
   canMsg.data[2] = oilpressureData;     //Oilpressure - psi
   canMsg.data[3] = boostData;         //  Update boost - psi
   canMsg.data[4] = 0x00;              //  Coolant - *C
@@ -119,23 +97,22 @@ void loop() {
   canMsg.data[6] = 0x00;              //  RPM 2
   canMsg.data[7] = 0x00;              //  Fuel - 0-255?
   mcp2515.sendMessage(&canMsg);     //Sends the CAN message
-
-  canMsg1.can_id  = 0x037;           //CAN id as 0x036
+  
+  //    Second CAN BUS Message
+  canMsg1.can_id  = 0x037;           //CAN id as 0x037
   canMsg1.can_dlc = 8;               //CAN data length as 8
-  canMsg1.data[0] = 0x00;             //Update egt value in [0]
-  canMsg1.data[1] = 0x10;            //Rest all with 0
+  canMsg1.data[0] = 0x00;             
+  canMsg1.data[1] = 0x10;            
   canMsg1.data[2] = 0x00;
-  canMsg1.data[3] = 0x10;             //Update egt value in [0]
-  canMsg1.data[4] = 0x00;            //Rest all with 0
+  canMsg1.data[3] = 0x10;             
+  canMsg1.data[4] = 0x00;            
   canMsg1.data[5] = 0x10;
   canMsg1.data[6] = 0x10;
   canMsg1.data[7] = 0x00;
   mcp2515.sendMessage(&canMsg1);     //Sends the CAN message
 
   Serial.print("EGT: ");
-  Serial.println(egtDataC, 1); //EGTC
-//  Serial.println(lowbyte);
-//  Serial.println(egtDataF); //EGTF
+  Serial.println(egtDataC); //EGTF
   Serial.print("BOOST: ");
   Serial.println(boostValue, 1); // Boost one decimal place
   Serial.print("OILPRESSURE: ");

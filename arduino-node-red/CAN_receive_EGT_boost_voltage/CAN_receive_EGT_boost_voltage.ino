@@ -15,6 +15,18 @@ unsigned char len = 0;
 unsigned char rxBuf[8];
 char msgString[128];                        // Array to store serial string
 
+// ITEMS TO OUTPUT VIA CAN ... VARIABLES
+
+unsigned int engine_rpm;
+unsigned int speed_cv;
+unsigned int coolant;
+float boost;
+unsigned int egt;
+float oil_pressure;
+unsigned int fuel;
+unsigned int outside_temp;
+unsigned char temp;
+
 #define CAN0_INT 2                              // Set INT to pin 2
 MCP_CAN CAN0(10);                               // Set CS to pin 10
 
@@ -51,43 +63,47 @@ void loop()
 
     if ((rxId) == 0x036) {  // Determine if message is a remote request frame.
 
-      int32_t egtc = rxBuf[1];
-      egtc = (egtc << 8) | rxBuf[0];
+      //    EGT Gauge (two bytes, combined)
+      egt = rxBuf[0];
+      egt = egt << 8;
+      temp = rxBuf[1];
+      egt = egt + temp;
+      Serial.print("EGT: ");
+      Serial.println(egt);
 
-      int32_t oilP = rxBuf[2];
-      float oilPData = oilP;
-      float oilPDisplay = oilPData / 100;
-      oilP = rxBuf[2];
+      
+      //    Oil Pressure Values /100 due to scaling on transmission
+      oil_pressure = rxBuf[2];
+      oil_pressure = oil_pressure / 100;
+      Serial.print("OIL PRESSURE: ");
+      Serial.println(oil_pressure);
 
-      int32_t boost = rxBuf[3];
-      float boostData = boost;
-      float boostDisplay = boostData / 10;
+      //    Boost value / 100 due to scaling
       boost = rxBuf[3];
+      boost = boost / 100;
+      Serial.print("BOOST: ");
+      Serial.println(boost);
 
-      //int32_t voltage = rxBuf[5];
-      //     egtc = (egtc << 8) | rxBuf[1];
+      //    Coolant Temp Value
+      coolant = rxBuf[4];
+      Serial.print("COOLANT: ");
+      Serial.println(coolant);
 
+      //    RPM Values
+      engine_rpm = rxBuf[5];
+      engine_rpm = engine_rpm << 8;
+      temp = rxBuf[6];
+      engine_rpm = engine_rpm + temp;
+      Serial.print("RPM:");
+      Serial.println(engine_rpm);
 
-
-      //voltage = (voltage << 8) | rxBuf[4];
-      // Convert voltage to float and then divide by sending multiplier (100) to display accurate decimal version
-      //float vin = voltage;
-      //float volt = vin/100;
-      //      char volt[8];
-      //    dtostrf(vin, 6, 2, volt);
-      //  Serial.print("EGT(c): ");
-      Serial.print(egtc);
-      Serial.print(",");
-      //      Serial.print("Boost(bar): ");
-      Serial.print(boostDisplay);
-      Serial.print(",");
-      //      Serial.print("Voltage: ");
-      Serial.print(oilPDisplay);
-      Serial.print("");
+      //    Fuel Sending Levels
+      fuel = rxBuf[7];
+      Serial.print("FUEL:");
+      Serial.println(fuel);
+      Serial.println();
 
     }
-    Serial.println();
-
   }
 }
 
